@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7c7cb913c746f1d49a523e57d1757ada
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - PrefabCasilla: {fileID: 1396850081008200443, guid: b82037636c77e9a40b262630751cee5a, type: 3}
+  - ContenedorTablero: {instanceID: 0}
+  - PrefabCarta: {fileID: 4907334076683984663, guid: af719cb5f678e8d478bfd8e938ddde58, type: 3}
+  - ContenedorManoJugador: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
