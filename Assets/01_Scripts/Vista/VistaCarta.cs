@@ -10,13 +10,14 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
     public TextMeshPro NameText;
     public TextMeshPro CostText;
     public Renderer ImagenArte;
+    public TextMeshPro LifeText;
+    public TextMeshPro DescriptionText;
 
 
     private ModeloCarta miModelo;
     private Vector3 posicionOriginal;
     private Camera camaraPrincipal;
     private bool arrastrando = false;
-
     private Collider miCollider;
 
     void Start()
@@ -35,9 +36,18 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
         // Actualizo los textos visuales con los datos del modelo
         if (NameText != null) NameText.text = modelo.Nombre;
         if (CostText != null) CostText.text = modelo.CosteMagia.ToString();
-        if (ImagenArte != null && imagen != null)
+
+        if (modelo is ModeloCriatura criatura)
         {
-            ImagenArte.material.mainTexture = imagen;
+            if (LifeText != null) LifeText.text = criatura.VidaMaxima.ToString();
+            if (DescriptionText != null) DescriptionText.text = modelo.Nombre + ": " + criatura.Ataque + " ATK";
+        }
+
+        Texture imagenCargada = Resources.Load<Texture>("Imagenes/" + modelo.Nombre);
+
+        if (imagenCargada != null && ImagenArte != null)
+        {
+            ImagenArte.material.mainTexture = imagenCargada;
         }
 
     }

@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 
 
-public class InfoCasilla : MonoBehaviour, IPointerClickHandler
+public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
 
     public bool EsTerritorioAliado = false;
@@ -12,11 +12,13 @@ public class InfoCasilla : MonoBehaviour, IPointerClickHandler
     public Material MaterialMaiz;
     public Material MaterialPantano;
 
+    public Material MaterialResaltado;
+    public Material MaterialRojo;
+
     // Esti cambia el material del objeto 3D ya que el tablero puede tener distintos tipos de terreno.
     private Renderer renderizador;
-
     private ModeloCasilla modelo;
-
+    private Material materialOriginal;
 
     // El awake lo uso para obtener el renderizador del objeto.
     void Awake()
@@ -56,6 +58,7 @@ public class InfoCasilla : MonoBehaviour, IPointerClickHandler
         if (renderizador != null && materialACambiar != null)
         {
             renderizador.material = materialACambiar;
+            materialOriginal = materialACambiar;
         }
     }
 
@@ -102,6 +105,25 @@ public class InfoCasilla : MonoBehaviour, IPointerClickHandler
             modelo.AsignarCriatura(carta);
         }
     }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!EstaOcupada && EsTerritorioAliado && eventData.dragging)
+        {
+            renderizador.material = MaterialResaltado;
+        }
+        else if (!EsTerritorioAliado && eventData.dragging)
+        {
+            renderizador.material = MaterialRojo;
+        }
+    }
 
 
+        public void OnPointerExit(PointerEventData eventData)
+    {
+        // Volvemos al estado normal
+        if (renderizador != null && materialOriginal != null)
+        {
+            renderizador.material = materialOriginal;
+        }
+    }
 }

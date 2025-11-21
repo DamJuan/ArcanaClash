@@ -1,0 +1,21 @@
+id;nombre;coste;ataque;vida;descripcion;imagen
+1;Rey;5;3;5;El rey del mazo. Lento pero fuerte.;ReyArt
+2;Mago;3;4;2;Lanza fuego a distancia.;MagoArt
+3;Muro;2;0;8;Una defensa solida de piedra.;MuroArt
+4;Caballero;4;4;4;Un guerrero equilibrado.;CaballeroArt
+5;Arquero;3;5;2;Ataca desde la retaguardia.;ArqueroArt
+6;Curandera;3;1;5;Restaura vida a los aliados cercanos.;CuranderaArt
+7;Asesino;4;7;2;Golpea muy fuerte pero resiste poco.;AsesinoArt
+8;Goblin;1;2;1;Barato, rápido y molesto.;GoblinArt
+9;Golem;7;4;10;Un gigante lento que absorbe daño.;GolemArt
+10;Nigromante;5;3;4;Invoca esqueletos de los caídos.;NigromanteArt
+11;Grifo;5;5;5;Unidad voladora que cruza obstáculos.;GrifoArt
+12;Catapulta;6;6;3;Ataque de asedio a muy larga distancia.;CatapultaArt
+13;Ladrón;2;3;2;Roba recursos al golpear al enemigo.;LadronArt
+14;Paladín;6;5;7;Guerrero sagrado con armadura pesada.;PaladinArt
+15;Espíritu;1;0;1;Explota al contacto causando daño de área.;EspirituArt
+16;Vampiro;4;4;4;Se cura una parte del daño que inflige.;VampiroArt
+17;Guardia;3;2;6;Posee un escudo que bloquea el primer golpe.;GuardiaArt
+18;Cazador;3;4;3;Bonificación de daño contra bestias.;CazadorArt
+19;Hidra;8;7;8;Al morir, se divide en dos hidras pequeñas.;HidraArt
+20;Bufón;2;1;3;Confunde al enemigo cambiando de objetivo.;BufonArt

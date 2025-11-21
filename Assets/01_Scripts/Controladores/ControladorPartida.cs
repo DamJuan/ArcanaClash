@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+using System.Collections;
 
 
 //Esto lo que hace es crear la partida, la logica del tablero y pinta casillas
@@ -23,6 +23,7 @@ public class ControladorPartida : MonoBehaviour
     private ModeloTablero tableroLogico;
     private ModeloJugador jugador1;
     private ModeloJugador jugador2;
+    public LectorCSV lector;
 
 
     void Start()
@@ -36,15 +37,59 @@ public class ControladorPartida : MonoBehaviour
 
         Debug.Log("Repartiendo cartas...");
 
-        //Cartas de prueba
-        CrearCartaEnMano(1, "Rey", 5, 3, 3);
-        CrearCartaEnMano(2, "Mago", 3, 1, 1);
-        CrearCartaEnMano(3, "Muro", 2, 0, 10);
-        CrearCartaEnMano(4, "Caballero", 4, 4, 4);
-        CrearCartaEnMano(5, "Arquero", 3, 2, 2);
+        StartCoroutine(IniciarPartida());
     }
 
-    void GenerarTableroVisual()
+    IEnumerator IniciarPartida()
+    {
+        Debug.Log("Cargando cartas...");
+
+        if (lector != null)
+        {
+            List<ModeloCriatura> todasLasCartas = lector.CargarCartas();
+
+            jugador1.CargarMazo(todasLasCartas);
+
+            jugador1.Barajar();
+
+            for (int i = 0; i < 5; i++)
+            {
+                RobarCartaJugador();
+                yield return new WaitForSeconds(0.2f); // Con esto consigo un efecto visual de robo de cartas
+            }
+        }
+        else
+        {
+            Debug.LogError("Falta asignar el LectorCSV en el GameController");
+        }
+    }
+
+    void RobarCartaJugador()
+    {
+        ModeloCriatura cartaRobada = jugador1.RobarCarta();
+
+        if (cartaRobada != null)
+        {
+            CrearCartaVisual(cartaRobada);
+        }
+    }
+
+    void CrearCartaVisual(ModeloCriatura cartaModelo)
+    {
+        if (PrefabCarta != null && ContenedorManoJugador != null)
+        {
+            GameObject cartaObj = Instantiate(PrefabCarta, ContenedorManoJugador);
+
+            VistaCarta vista = cartaObj.GetComponent<VistaCarta>();
+            if (vista != null)
+            {
+                vista.Configurar(cartaModelo);
+            }
+            OrganizarMano(); 
+        }
+    }
+
+        void GenerarTableroVisual()
     {
         // Bucle para recorrer todas las posiciones del tablero
         for (int x = 0; x < 4; x++)
@@ -80,23 +125,6 @@ public class ControladorPartida : MonoBehaviour
                     }
                 }
             }
-        }
-    }
-    void CrearCartaEnMano(int id, string nombre, int coste, int ataque, int vida)
-    {
-        ModeloCriatura cartaModelo = new ModeloCriatura(id, nombre, coste, ataque, vida);
-        jugador1.Mano.Add(cartaModelo);
-
-        if (PrefabCarta != null && ContenedorManoJugador != null)
-        {
-            GameObject cartaObj = Instantiate(PrefabCarta, ContenedorManoJugador);
-            // Conecto los textos (Nombre y Coste) con el dato
-            VistaCarta vista = cartaObj.GetComponent<VistaCarta>();
-            if (vista != null)
-            {
-                vista.Configurar(cartaModelo);
-            }
-            OrganizarMano();
         }
     }
 
