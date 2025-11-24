@@ -13,6 +13,9 @@ public class ModeloJugador
     public int MagiaMaxima { get; private set; }
     public int ZonasTerrestresRestantes { get; private set; }
 
+    public int CartasJugadasEsteTurno { get; private set; }
+    private const int MAX_JUGADAS_TURNO = 4;
+
 
 
     // Cartas que componen el mazo del jugador.
@@ -38,17 +41,33 @@ public class ModeloJugador
         this.MagiaMaxima = 0; 
         this.MagiaActual = 0;
         this.ZonasTerrestresRestantes = 4;
+        CartasJugadasEsteTurno = 0;
     }
 
     public void CargarMazo(List<ModeloCriatura> cartasIniciales)
     {
         this.Mazo = new List<ModeloCriatura>(cartasIniciales);
     }
+    public bool PuedeJugarCarta()
+    {
+        return CartasJugadasEsteTurno < MAX_JUGADAS_TURNO;
+    }
+
+    public void RegistrarJugada()
+    {
+        CartasJugadasEsteTurno++;
+    }
+
+    public void ReiniciarTurno()
+    {
+        CartasJugadasEsteTurno = 0;
+        // Aquí también recargo maná en el futuro
+    }
 
     public void Barajar()
     {
         // Uso System.Randos porque UnityEngine.Random no funciona fuera del entorno de Unity.
-        var random = new System.Random();
+        System.Random random = new System.Random();
         this.Mazo = this.Mazo.OrderBy(carta => random.Next()).ToList();
     }
 
