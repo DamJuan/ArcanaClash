@@ -24,7 +24,14 @@ public class ControladorPartida : MonoBehaviour
     private ModeloJugador jugador1;
     private ModeloJugador jugador2;
     public LectorCSV lector;
+    public static ControladorPartida Instancia;
 
+    void Awake()
+    {
+        if (Instancia == null) Instancia = this;
+        else Destroy(gameObject);
+    }
+    public ModeloJugador JugadorLocal { get { return jugador1; } }
 
     void Start()
     {

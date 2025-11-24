@@ -84,9 +84,15 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
 
             InfoCasilla casillaDetectada = golpe.collider.GetComponent<InfoCasilla>();
 
-            if (casillaDetectada != null && !casillaDetectada.EstaOcupada && casillaDetectada.EsTerritorioAliado)
+            // Verifico si el jugador puede jugar la carta
+            bool quedanJugadas = ControladorPartida.Instancia.JugadorLocal.PuedeJugarCarta();
+
+            if (casillaDetectada != null && !casillaDetectada.EstaOcupada && casillaDetectada.EsTerritorioAliado && quedanJugadas)
             {
                 JugarCartaEnCasilla(casillaDetectada);
+
+                //Aqui resto una jugada al jugador
+                ControladorPartida.Instancia.JugadorLocal.RegistrarJugada();
                 if (miCollider != null) miCollider.enabled = true;
                 return;
             }
