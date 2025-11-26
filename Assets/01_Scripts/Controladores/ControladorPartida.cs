@@ -107,13 +107,13 @@ public class ControladorPartida : MonoBehaviour
                 ModeloCasilla modelo = tableroLogico.ObtenerCasilla(x, y);
 
                 // Calculo dónde poner el cubo
-                Vector3 posicion = new Vector3(x * 2.0f, 0, y * 2.0f);
+                Vector3 posicionLocal = new Vector3(x * 2.0f, 0, y * 2.0f);
 
                 // Instancio el Prefab
-                GameObject nuevaCasilla = Instantiate(PrefabCasilla, posicion, Quaternion.identity);
+                GameObject nuevaCasilla = Instantiate(PrefabCasilla, ContenedorTablero, false);
 
-                // La hago hija del contenedor para tener orden
-                if (ContenedorTablero != null) nuevaCasilla.transform.SetParent(ContenedorTablero);
+                nuevaCasilla.transform.localPosition = posicionLocal;
+
                 nuevaCasilla.name = $"Casilla_{x}_{y}";
 
                 // Conecto la Vista con el Modelo
