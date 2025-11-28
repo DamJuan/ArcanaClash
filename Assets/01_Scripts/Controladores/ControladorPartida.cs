@@ -15,10 +15,7 @@ public class ControladorPartida : MonoBehaviour
     public GameObject PrefabCarta;
     public Transform ContenedorManoJugador;
 
-    //Esto es para ver tipo abanico las cartas en la mano
     public float SeparacionCartas = 0.8f; 
-    public float CurvaAltura = 0.2f;      
-    public float RotacionAbanico = 5f;
 
     private ModeloTablero tableroLogico;
     private ModeloJugador jugador1;
@@ -40,11 +37,24 @@ public class ControladorPartida : MonoBehaviour
         jugador1 = new ModeloJugador("Jugador 1");
         jugador2 = new ModeloJugador("La IA malvada");
 
+        jugador1.RestaurarMagia();
+
+        ActualizarUI();
+
         GenerarTableroVisual();
 
         Debug.Log("Repartiendo cartas...");
 
         StartCoroutine(IniciarPartida());
+    }
+
+    public void ActualizarUI()
+    {
+        if (GestorUI.Instancia != null)
+        {
+            // Con esto le mando los datos del modeloJugador a la pantalla
+            GestorUI.Instancia.ActualizarMana(jugador1.MagiaActual, jugador1.MagiaMaxima);
+        }
     }
 
     IEnumerator IniciarPartida()
@@ -149,12 +159,9 @@ public class ControladorPartida : MonoBehaviour
 
             float posX = diferencia * SeparacionCartas;
 
-            float posY = Mathf.Abs(diferencia) * -CurvaAltura;
+            carta.localPosition = new Vector3(posX, 0, 0);
 
-            carta.localPosition = new Vector3(posX, posY, 0);
-
-            float rotZ = diferencia * -RotacionAbanico;
-            carta.localRotation = Quaternion.Euler(0, 0, rotZ);
+            carta.localRotation = Quaternion.identity;
         }
     }
 

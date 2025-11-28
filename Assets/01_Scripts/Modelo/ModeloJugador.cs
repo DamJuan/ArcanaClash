@@ -38,7 +38,7 @@ public class ModeloJugador
         this.Mano = new List<ModeloCriatura>();
         this.Descarte = new List<ModeloCriatura>();
 
-        this.MagiaMaxima = 0; 
+        this.MagiaMaxima = 2; 
         this.MagiaActual = 0;
         this.ZonasTerrestresRestantes = 4;
         CartasJugadasEsteTurno = 0;
