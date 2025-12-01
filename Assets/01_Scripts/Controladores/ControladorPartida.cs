@@ -165,4 +165,26 @@ public class ControladorPartida : MonoBehaviour
         }
     }
 
+    public void BotonPasarTurno()
+    {
+        Debug.Log("CAMBIO DE TURNO");
+
+        // Aumento el mana maximo
+        // Solo sube si es menor que 10
+        if (jugador1.MagiaMaxima < 10)
+        {
+            jugador1.SubirManaMaximo();
+        }
+
+        // Relleno el maná y reinicio contador de cartas jugadas
+        jugador1.RestaurarMagia();
+        jugador1.ReiniciarTurno();
+
+        // Robo carta nueva
+        RobarCartaJugador();
+
+        // Actualizo la UI
+        ActualizarUI();
+    }
+
 }

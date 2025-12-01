@@ -32221,8 +32221,6 @@ MonoBehaviour:
   PrefabCarta: {fileID: 4907334076683984663, guid: af719cb5f678e8d478bfd8e938ddde58, type: 3}
   ContenedorManoJugador: {fileID: 1058571071}
   SeparacionCartas: 0.8
-  CurvaAltura: 0.2
-  RotacionAbanico: 0.6
   lector: {fileID: 84675590}
 --- !u!4 &810601705
 Transform:
@@ -50167,7 +50165,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1241878800}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 810601704}
+        m_TargetAssemblyTypeName: ControladorPartida, Assembly-CSharp
+        m_MethodName: BotonPasarTurno
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1241878800
 MonoBehaviour:
   m_ObjectHideFlags: 0

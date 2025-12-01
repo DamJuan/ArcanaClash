@@ -191,9 +191,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
     public void OnEndDrag(PointerEventData eventData) { 
         arrastrando = false;
-
         RestaurarTextos();
-
         Ray rayo = camaraPrincipal.ScreenPointToRay(eventData.position);
         RaycastHit golpe;
 
@@ -204,17 +202,32 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
             InfoCasilla casillaDetectada = golpe.collider.GetComponent<InfoCasilla>();
 
-            // Verifico si el jugador puede jugar la carta
+            ModeloJugador jugador = ControladorPartida.Instancia.JugadorLocal;
+
+            bool esMiTerritorio = casillaDetectada != null && casillaDetectada.EsTerritorioAliado;
+            bool estaVacia = casillaDetectada != null && !casillaDetectada.EstaOcupada;
             bool quedanJugadas = ControladorPartida.Instancia.JugadorLocal.PuedeJugarCarta();
 
-            if (casillaDetectada != null && !casillaDetectada.EstaOcupada && casillaDetectada.EsTerritorioAliado && quedanJugadas)
+            bool tengoMana = jugador.MagiaActual >= miModelo.CosteMagia;
+
+            if (esMiTerritorio && estaVacia && tengoMana && quedanJugadas)
             {
                 JugarCartaEnCasilla(casillaDetectada);
 
-                //Aqui resto una jugada al jugador
-                ControladorPartida.Instancia.JugadorLocal.RegistrarJugada();
+                jugador.GastarMagia(miModelo.CosteMagia);
+                jugador.RegistrarJugada();
+
+                ControladorPartida.Instancia.ActualizarUI();
+
                 if (miCollider != null) miCollider.enabled = true;
                 return;
+            }
+            else
+            {
+                if (!esMiTerritorio) Debug.Log("Territorio enemigo.");
+                else if (!estaVacia) Debug.Log(" Casilla ocupada.");
+                else if (!quedanJugadas) Debug.Log(" Límite de cartas alcanzado.");
+                else if (!tengoMana) Debug.Log("¡No tienes suficiente maná!");
             }
         }
         transform.position = posicionOriginal;
@@ -259,6 +272,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         if (miModelo is ModeloCriatura criatura)
         {
             casilla.RecibirCarta(criatura);
+            ControladorPartida.Instancia.JugadorLocal.EliminarCartaDeMano(criatura);
         }
 
         Destroy(this);

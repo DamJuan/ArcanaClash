@@ -105,4 +105,17 @@ public class ModeloJugador
     {
         this.MagiaActual -= coste;
     }
+
+    public void SubirManaMaximo()
+    {
+        this.MagiaMaxima++;
+    }
+
+    public void EliminarCartaDeMano(ModeloCriatura carta)
+    {
+        if (Mano.Contains(carta))
+        {
+            Mano.Remove(carta);
+        }
+    }
 }
