@@ -23,6 +23,8 @@ public class ControladorPartida : MonoBehaviour
     public LectorCSV lector;
     public static ControladorPartida Instancia;
 
+    private bool esTurnoJugador = true;
+
     void Awake()
     {
         if (Instancia == null) Instancia = this;
@@ -66,8 +68,16 @@ public class ControladorPartida : MonoBehaviour
             List<ModeloCriatura> todasLasCartas = lector.CargarCartas();
 
             jugador1.CargarMazo(todasLasCartas);
-
             jugador1.Barajar();
+
+            jugador2.CargarMazo(todasLasCartas); 
+            jugador2.Barajar();
+
+            for (int k = 0; k < 5; k++)
+            {
+                jugador2.RobarCarta();
+            }
+            Debug.Log($"La IA empieza con {jugador2.Mano.Count} cartas.");
 
             for (int i = 0; i < 5; i++)
             {
@@ -167,24 +177,121 @@ public class ControladorPartida : MonoBehaviour
 
     public void BotonPasarTurno()
     {
-        Debug.Log("CAMBIO DE TURNO");
+        if (!esTurnoJugador) return;
+        esTurnoJugador = false;
 
-        // Aumento el mana maximo
-        // Solo sube si es menor que 10
-        if (jugador1.MagiaMaxima < 10)
+        // Desactivo el boton de pasar turno hasta que sea el turno del jugador de nuevo
+        if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(false);
+
+        StartCoroutine(TurnoIA());
+
+    }
+
+    IEnumerator TurnoIA()
+    {
+        yield return new WaitForSeconds(1.0f); // Pausa para que se note el cambio de turno
+
+        jugador2.SubirManaMaximo();
+        jugador2.RestaurarMagia();
+        jugador2.ReiniciarTurno();
+
+        ModeloCriatura cartaRobada = jugador2.RobarCarta();
+
+        Debug.Log($"La IA tiene {jugador2.MagiaActual} maná y {jugador2.Mano.Count} cartas.");
+
+        yield return new WaitForSeconds(1.0f); // Pausa para simular que piensa
+
+        // Bucle de jugar cartas
+        // Recorro la mano al revés para poder borrar cartas sin romper el bucle
+        for (int i = jugador2.Mano.Count - 1; i >= 0; i--)
         {
-            jugador1.SubirManaMaximo();
+            ModeloCriatura cartaCandidata = jugador2.Mano[i];
+
+            if (jugador2.MagiaActual >= cartaCandidata.CosteMagia && jugador2.PuedeJugarCarta())
+            {
+                ModeloCasilla sitio = EncontrarCasillaVaciaIA();
+
+                if (sitio != null)
+                {
+                    Debug.Log($"IA juega {cartaCandidata.Nombre} en ({sitio.CoordenadaX},{sitio.CoordenadaY})");
+
+                    JugarCartaIA_Visual(cartaCandidata, sitio);
+
+                    jugador2.GastarMagia(cartaCandidata.CosteMagia);
+                    jugador2.RegistrarJugada();
+                    jugador2.EliminarCartaDeMano(cartaCandidata);
+
+                    yield return new WaitForSeconds(1.5f); // Pausa entre cartas para simular el movimiento y que no sea instantáneo
+                }
+            }
         }
 
-        // Relleno el maná y reinicio contador de cartas jugadas
+        Debug.Log("Fin turno IA. TE TOCA.");
+
+        ComenzarTurnoJugador();
+    }
+
+    void ComenzarTurnoJugador()
+    {
+        jugador1.SubirManaMaximo();
         jugador1.RestaurarMagia();
         jugador1.ReiniciarTurno();
 
-        // Robo carta nueva
         RobarCartaJugador();
 
-        // Actualizo la UI
         ActualizarUI();
+        esTurnoJugador = true;
+        if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(true);
+    }
+
+
+
+    // ESTE METODO HACE QUE LA IA JUEGUE UNA CARTA EN UNA CASILLA VACIA DE SU ZONA
+    ModeloCasilla EncontrarCasillaVaciaIA()
+    {
+       
+        for (int y = 2; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                ModeloCasilla posibleCasilla = tableroLogico.ObtenerCasilla(x, y);
+                if (!posibleCasilla.EstaOcupada)
+                {
+                    return posibleCasilla;
+                }
+            }
+        }
+        return null;
+    }
+
+    // METODO PARA QUE LA IA JUEGUE UNA CARTA y ACTUALICE LA PARTE VISUAL
+    void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
+    {
+        // Buscamos el objeto visual de la casilla donde vamos a poner la carta lo busco por nombre demomento 
+        GameObject objCasilla = GameObject.Find($"Casilla_{casillaLogica.CoordenadaX}_{casillaLogica.CoordenadaY}");
+
+        if (objCasilla != null)
+        {
+            Transform transformCasilla = objCasilla.transform;
+
+            // Creo la carta directamente en la casilla
+            GameObject cartaIA = Instantiate(PrefabCarta, transformCasilla);
+
+            cartaIA.transform.localPosition = Vector3.up * 0.05f;
+            cartaIA.transform.localRotation = Quaternion.identity;
+            cartaIA.transform.localScale = Vector3.one;
+
+            VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
+            if (vista != null)
+            {
+                vista.Configurar(carta);
+                // Quito el componente de interacción para que no se pueda tocar la carta de la IA
+                Destroy(vista);
+            }
+
+            InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
+            if (info != null) info.RecibirCarta(carta);
+        }
     }
 
 }
