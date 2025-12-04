@@ -15,7 +15,7 @@ public class ControladorPartida : MonoBehaviour
     public GameObject PrefabCarta;
     public Transform ContenedorManoJugador;
 
-    public float SeparacionCartas = 0.8f; 
+    public float SeparacionCartas = 2f; 
 
     private ModeloTablero tableroLogico;
     private ModeloJugador jugador1;

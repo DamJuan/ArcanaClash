@@ -2,25 +2,21 @@ using UnityEngine;
 using UnityEngine.EventSystems; 
 using TMPro;
 using System.Collections;
+using UnityEngine.UI;
 
 
 //Esto pinta el nombre, el coste y la descripción en el objeto 3D.
 public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDragHandler, IPointerClickHandler
 {
 
-    public TextMeshPro NameText;
-    public TextMeshPro CostText;
-    public Renderer ImagenArte;
-    public TextMeshPro LifeText;
-    public TextMeshPro DescriptionText;
+    public TextMeshProUGUI NameText;
+    public TextMeshProUGUI CostText;
+    public TextMeshProUGUI LifeText;
+    public TextMeshProUGUI DescriptionText;
+    public RawImage ImagenArte;
+    public RawImage FondoCarta;
 
-    public Vector3 OffsetTextoDrag = new Vector3(0, 0.1f, 0);
-    public Vector3 OffsetTextoZoom = new Vector3(0, -0.02f, 0);
-
-    private Vector3 posBaseNombre;
-    private Vector3 posBaseCoste;
-    private Vector3 posBaseVida;
-    private Vector3 posBaseDesc;
+    public static VistaCarta cartaEnZoom = null;
 
     private bool enZoom = false;
     private bool animando = false;
@@ -43,19 +39,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         miCollider = GetComponent<Collider>();
         GameObject objZoom = GameObject.Find("PuntoZoom");
         if (objZoom != null) puntoZoom = objZoom.transform;
-        GuardarPosicionesBaseTexto();
     }
-
-    void GuardarPosicionesBaseTexto()
-    {
-        if (NameText != null) posBaseNombre = NameText.transform.localPosition;
-        if (CostText != null) posBaseCoste = CostText.transform.localPosition;
-        if (LifeText != null) posBaseVida = LifeText.transform.localPosition;
-        if (DescriptionText != null) posBaseDesc = DescriptionText.transform.localPosition;
-    }
-
-
-    // Método para inicializar la carta visual con sus datos reales lo llama el Controlador cuando roba una carta.
 
     public void Configurar(ModeloCarta modelo, Texture imagen = null)
     {
@@ -70,40 +54,89 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
             if (DescriptionText != null) DescriptionText.text = modelo.Nombre + ": " + criatura.Ataque + " ATK";
         }
 
-        Texture imagenCargada = Resources.Load<Texture>("Imagenes/" + modelo.Nombre);
+        string ruta = "Imagenes/" + modelo.Nombre;
 
-        if (imagenCargada != null && ImagenArte != null)
+        Debug.Log($"Buscando imagen en: '{ruta}'");
+
+        Texture imagenCargada = Resources.Load<Texture>(ruta);
+
+        if (imagenCargada == null)
         {
-            ImagenArte.material.mainTexture = imagenCargada;
+            Debug.LogError($" FALLO: No existe el archivo en 'Assets/Resources/{ruta}'");
+        }
+        else
+        {
+            Debug.Log($" ÉXITO: Imagen encontrada. Asignando a RawImage...");
+            if (ImagenArte != null)
+            {
+                ImagenArte.texture = imagenCargada;
+                ImagenArte.color = Color.white;
+            }
+            else Debug.LogError(" FALLO: La variable 'ImagenArte' está vacía en el Prefab.");
         }
 
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Solo mostramos info si NO estamos arrastrando la carta
         if (!arrastrando && !animando && puntoZoom != null)
         {
-            Debug.Log("Clic en carta: " + miModelo.Nombre);
-
             if (!enZoom)
             {
+                if (cartaEnZoom != null && cartaEnZoom != this)
+                {
+                    cartaEnZoom.DesactivarZoom();
+                }
+
                 ActivarZoom();
             }
             else
             {
                 DesactivarZoom();
             }
+        }
+    }
 
-            if (GestorUI.Instancia != null)
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (enZoom) DesactivarZoom();
+
+        arrastrando = true;
+        posicionOriginal = transform.position;
+
+        if (miCollider != null) miCollider.enabled = false;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (arrastrando)
+        {
+            MoverCartaConRaton(eventData.position);
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        arrastrando = false;
+        Ray rayo = camaraPrincipal.ScreenPointToRay(eventData.position);
+        RaycastHit golpe;
+
+        if (Physics.Raycast(rayo, out golpe))
+        {
+            InfoCasilla casillaDetectada = golpe.collider.GetComponent<InfoCasilla>();
+            bool quedanJugadas = ControladorPartida.Instancia.JugadorLocal.PuedeJugarCarta();
+
+            if (casillaDetectada != null && !casillaDetectada.EstaOcupada && casillaDetectada.EsTerritorioAliado && quedanJugadas)
             {
-                GestorUI.Instancia.MostrarInformacion(miModelo);
-            }
-            else
-            {
-                Debug.LogWarning("No encuentro el GestorUI. ¿Está creado en la escena?");
+                JugarCartaEnCasilla(casillaDetectada);
+                ControladorPartida.Instancia.JugadorLocal.RegistrarJugada();
+                if (miCollider != null) miCollider.enabled = true;
+                return;
             }
         }
+
+        transform.position = posicionOriginal;
+        if (miCollider != null) miCollider.enabled = true;
     }
 
     void ActivarZoom()
@@ -114,27 +147,25 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         escalaOriginalLocal = transform.localScale;
         siblingIndexOriginal = transform.GetSiblingIndex();
 
+        cartaEnZoom = this;
+
         transform.SetParent(puntoZoom);
 
-        StartCoroutine(AnimarViaje(Vector3.zero, Quaternion.identity, Vector3.one * 1.5f));
-
-        if (GestorUI.Instancia != null) GestorUI.Instancia.MostrarInformacion(miModelo);
-
-        AplicarOffsetTextos(OffsetTextoZoom);
-
+        StartCoroutine(AnimarViaje(Vector3.zero, Quaternion.identity, Vector3.one * 3.0f));
         enZoom = true;
     }
 
     void DesactivarZoom()
     {
+
+        if (cartaEnZoom == this) cartaEnZoom = null;
+
         transform.SetParent(padreOriginal);
         transform.SetSiblingIndex(siblingIndexOriginal);
 
         StartCoroutine(AnimarViaje(posOriginalLocal, rotOriginalLocal, escalaOriginalLocal));
 
         if (GestorUI.Instancia != null) GestorUI.Instancia.CerrarPanel();
-
-        RestaurarTextos();
 
         enZoom = false;
     }
@@ -170,89 +201,6 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         animando = false;
     }
 
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (enZoom) DesactivarZoom();
-
-        arrastrando = true;
-        posicionOriginal = transform.position;
-
-        if (miCollider != null) miCollider.enabled = false;
-        AplicarOffsetTextos(OffsetTextoDrag);
-    }
-
-    public void OnDrag(PointerEventData eventData) {
-        if (arrastrando)
-        {
-            MoverCartaConRaton(eventData.position);
-        }
-    }
-
-    public void OnEndDrag(PointerEventData eventData) { 
-        arrastrando = false;
-        RestaurarTextos();
-        Ray rayo = camaraPrincipal.ScreenPointToRay(eventData.position);
-        RaycastHit golpe;
-
-        if (Physics.Raycast(rayo, out golpe))
-        {
-
-            Debug.Log("He tocado: " + golpe.collider.name);
-
-            InfoCasilla casillaDetectada = golpe.collider.GetComponent<InfoCasilla>();
-
-            ModeloJugador jugador = ControladorPartida.Instancia.JugadorLocal;
-
-            bool esMiTerritorio = casillaDetectada != null && casillaDetectada.EsTerritorioAliado;
-            bool estaVacia = casillaDetectada != null && !casillaDetectada.EstaOcupada;
-            bool quedanJugadas = ControladorPartida.Instancia.JugadorLocal.PuedeJugarCarta();
-
-            bool tengoMana = jugador.MagiaActual >= miModelo.CosteMagia;
-
-            if (esMiTerritorio && estaVacia && tengoMana && quedanJugadas)
-            {
-                JugarCartaEnCasilla(casillaDetectada);
-
-                jugador.GastarMagia(miModelo.CosteMagia);
-                jugador.RegistrarJugada();
-
-                ControladorPartida.Instancia.ActualizarUI();
-
-                if (miCollider != null) miCollider.enabled = true;
-                return;
-            }
-            else
-            {
-                if (!esMiTerritorio) Debug.Log("Territorio enemigo.");
-                else if (!estaVacia) Debug.Log(" Casilla ocupada.");
-                else if (!quedanJugadas) Debug.Log(" Límite de cartas alcanzado.");
-                else if (!tengoMana) Debug.Log("¡No tienes suficiente maná!");
-            }
-        }
-        transform.position = posicionOriginal;
-        if (miCollider != null) miCollider.enabled = true;
-
-        Debug.Log("Carta soltada en la nada. Volviendo...");
-
-    }
-
-    void AplicarOffsetTextos(Vector3 offset)
-    {
-        if (NameText != null) NameText.transform.localPosition = posBaseNombre + offset;
-        if (CostText != null) CostText.transform.localPosition = posBaseCoste + offset;
-        if (LifeText != null) LifeText.transform.localPosition = posBaseVida + offset;
-        if (DescriptionText != null) DescriptionText.transform.localPosition = posBaseDesc + offset;
-    }
-
-    void RestaurarTextos()
-    {
-        if (NameText != null) NameText.transform.localPosition = posBaseNombre;
-        if (CostText != null) CostText.transform.localPosition = posBaseCoste;
-        if (LifeText != null) LifeText.transform.localPosition = posBaseVida;
-        if (DescriptionText != null) DescriptionText.transform.localPosition = posBaseDesc;
-    }
-
     private void JugarCartaEnCasilla(InfoCasilla casilla)
     {
         Debug.Log("¡Carta jugada en la casilla: " + casilla.name + "!");
@@ -264,7 +212,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         transform.SetParent(casilla.transform);
 
         // Reseteo la rotación para que se quede plana en el suelo
-        transform.rotation = Quaternion.identity;
+        transform.rotation = Quaternion.Euler(0, 0, 0);
 
         transform.localScale = Vector3.one;
 
