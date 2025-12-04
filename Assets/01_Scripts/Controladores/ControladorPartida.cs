@@ -45,8 +45,6 @@ public class ControladorPartida : MonoBehaviour
 
         GenerarTableroVisual();
 
-        Debug.Log("Repartiendo cartas...");
-
         StartCoroutine(IniciarPartida());
     }
 
@@ -56,12 +54,13 @@ public class ControladorPartida : MonoBehaviour
         {
             // Con esto le mando los datos del modeloJugador a la pantalla
             GestorUI.Instancia.ActualizarMana(jugador1.MagiaActual, jugador1.MagiaMaxima);
+
+            GestorUI.Instancia.ActualizarVidas(jugador1.Vida, jugador2.Vida);
         }
     }
 
     IEnumerator IniciarPartida()
     {
-        Debug.Log("Cargando cartas...");
 
         if (lector != null)
         {
@@ -77,17 +76,12 @@ public class ControladorPartida : MonoBehaviour
             {
                 jugador2.RobarCarta();
             }
-            Debug.Log($"La IA empieza con {jugador2.Mano.Count} cartas.");
 
             for (int i = 0; i < 5; i++)
             {
                 RobarCartaJugador();
                 yield return new WaitForSeconds(0.2f); // Con esto consigo un efecto visual de robo de cartas
             }
-        }
-        else
-        {
-            Debug.LogError("Falta asignar el LectorCSV en el GameController");
         }
     }
 
@@ -178,11 +172,15 @@ public class ControladorPartida : MonoBehaviour
     public void BotonPasarTurno()
     {
         if (!esTurnoJugador) return;
+
+        ResolverFaseCombate(jugador1, jugador2, true);
+
+        if (jugador2.Vida <= 0) { Debug.Log("¡HAS GANADO!"); return; }
+
         esTurnoJugador = false;
 
         // Desactivo el boton de pasar turno hasta que sea el turno del jugador de nuevo
         if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(false);
-
         StartCoroutine(TurnoIA());
 
     }
@@ -197,9 +195,11 @@ public class ControladorPartida : MonoBehaviour
 
         ModeloCriatura cartaRobada = jugador2.RobarCarta();
 
-        Debug.Log($"La IA tiene {jugador2.MagiaActual} maná y {jugador2.Mano.Count} cartas.");
+        ResolverFaseCombate(jugador2, jugador1, false);
+        if (jugador1.Vida <= 0) { Debug.Log(" HAS PERDIDO..."); yield break; }
 
         yield return new WaitForSeconds(1.0f); // Pausa para simular que piensa
+                     
 
         // Bucle de jugar cartas
         // Recorro la mano al revés para poder borrar cartas sin romper el bucle
@@ -213,7 +213,6 @@ public class ControladorPartida : MonoBehaviour
 
                 if (sitio != null)
                 {
-                    Debug.Log($"IA juega {cartaCandidata.Nombre} en ({sitio.CoordenadaX},{sitio.CoordenadaY})");
 
                     JugarCartaIA_Visual(cartaCandidata, sitio);
 
@@ -226,20 +225,21 @@ public class ControladorPartida : MonoBehaviour
             }
         }
 
-        Debug.Log("Fin turno IA. TE TOCA.");
-
         ComenzarTurnoJugador();
     }
 
     void ComenzarTurnoJugador()
     {
+
+        DespertarCriaturasAliadas();
+
         jugador1.SubirManaMaximo();
         jugador1.RestaurarMagia();
         jugador1.ReiniciarTurno();
 
         RobarCartaJugador();
-
         ActualizarUI();
+
         esTurnoJugador = true;
         if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(true);
     }
@@ -277,9 +277,10 @@ public class ControladorPartida : MonoBehaviour
             // Creo la carta directamente en la casilla
             GameObject cartaIA = Instantiate(PrefabCarta, transformCasilla);
 
-            cartaIA.transform.localPosition = Vector3.up * 0.05f;
-            cartaIA.transform.localRotation = Quaternion.identity;
-            cartaIA.transform.localScale = Vector3.one;
+            cartaIA.transform.localPosition = Vector3.up * 0.2f;
+            cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+            cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
 
             VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
             if (vista != null)
@@ -293,5 +294,121 @@ public class ControladorPartida : MonoBehaviour
             if (info != null) info.RecibirCarta(carta);
         }
     }
+
+    void DespertarCriaturasAliadas()
+    {
+        foreach (Transform hijoCasilla in ContenedorTablero)
+        {
+
+            VistaCriatura criatura = hijoCasilla.GetComponentInChildren<VistaCriatura>();
+
+            InfoCasilla infoCasilla = hijoCasilla.GetComponent<InfoCasilla>();
+
+            if (criatura != null && infoCasilla != null && infoCasilla.EsTerritorioAliado)
+            {
+                criatura.Despertar();
+            }
+        }
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = 0; y < 2; y++)
+            { // Mis filas
+                ModeloCasilla c = tableroLogico.ObtenerCasilla(x, y);
+                if (c.EstaOcupada) c.CriaturaEnCasilla.PuedeAtacar = true;
+            }
+        }
+
+    }
+
+    public void MatarCriatura(ModeloCriatura criatura, ModeloCasilla casilla)
+    {
+
+        casilla.LimpiarCasilla();
+
+        GameObject objCasilla = GameObject.Find($"Casilla_{casilla.CoordenadaX}_{casilla.CoordenadaY}");
+        if (objCasilla != null)
+        {
+
+            VistaCriatura vista = objCasilla.GetComponentInChildren<VistaCriatura>();
+            if (vista != null)
+            {
+                Destroy(vista.gameObject);
+            }
+        }
+    }
+
+    void ResolverFaseCombate(ModeloJugador atacante, ModeloJugador defensor, bool esTurnoJugador)
+    {
+        // Defino qué filas son de quién
+        int filaInicio = esTurnoJugador ? 0 : 2;
+        int filaFin = esTurnoJugador ? 2 : 4;
+        int direccion = esTurnoJugador ? 1 : -1;
+
+ 
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = filaInicio; y < filaFin; y++)
+            {
+                ModeloCasilla casillaAtacante = tableroLogico.ObtenerCasilla(x, y);
+
+                // Si hay bicho y está despierto
+                if (casillaAtacante.EstaOcupada && casillaAtacante.CriaturaEnCasilla.PuedeAtacar)
+                {
+                    ModeloCriatura bicho = casillaAtacante.CriaturaEnCasilla;
+
+                    // Busco objetivo para atacar
+                    ModeloCriatura enemigoEncontrado = null;
+                    ModeloCasilla casillaEnemiga = null;
+
+                    // Miro las casillas que tiene delante en su misma columna
+                    int yObjetivoStart = esTurnoJugador ? 2 : 1;
+                    int yObjetivoEnd = esTurnoJugador ? 4 : -1;
+
+
+                    if (esTurnoJugador)
+                    {
+                        for (int targetY = 2; targetY < 4; targetY++)
+                        {
+                            ModeloCasilla c = tableroLogico.ObtenerCasilla(x, targetY);
+                            if (c.EstaOcupada) { enemigoEncontrado = c.CriaturaEnCasilla; casillaEnemiga = c; break; }
+                        }
+                    }
+                    else
+                    {
+                        for (int targetY = 1; targetY >= 0; targetY--)
+                        {
+                            ModeloCasilla c = tableroLogico.ObtenerCasilla(x, targetY);
+                            if (c.EstaOcupada) { enemigoEncontrado = c.CriaturaEnCasilla; casillaEnemiga = c; break; }
+                        }
+                    }
+
+                    // --- RESOLVER EL GOLPE ---
+                    if (enemigoEncontrado != null)
+                    {
+                        // Golpe a criatura
+                        Debug.Log($"y golpea a {enemigoEncontrado.Nombre} por {bicho.Ataque} daño!");
+                        enemigoEncontrado.RecibirDanio(bicho.Ataque);
+
+                        // Actualizo visuales del enemigo (Vida)
+                        GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
+                        if (objCasillaEnemiga) objCasillaEnemiga.GetComponentInChildren<VistaCriatura>()?.ActualizarVisuales();
+
+                        if (enemigoEncontrado.VidaActual <= 0)
+                        {
+                            MatarCriatura(enemigoEncontrado, casillaEnemiga);
+                        }
+                    }
+                    else
+                    {
+                        // Golpe directo al Jugador
+                        Debug.Log($"y golpea DIRECTO al Rival por {bicho.Ataque} daño!");
+                        defensor.RecibirDanio(bicho.Ataque);
+                        ActualizarUI();
+                    }
+                }
+            }
+        }
+    }
+
 
 }

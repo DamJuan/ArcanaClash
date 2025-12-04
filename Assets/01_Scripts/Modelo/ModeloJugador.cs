@@ -9,6 +9,8 @@ public class ModeloJugador
 
      public string Nombre { get; private set; }
 
+    public int Vida { get; private set; }
+
     public int MagiaActual { get; private set; }
     public int MagiaMaxima { get; private set; }
     public int ZonasTerrestresRestantes { get; private set; }
@@ -42,6 +44,8 @@ public class ModeloJugador
         this.MagiaActual = 0;
         this.ZonasTerrestresRestantes = 4;
         CartasJugadasEsteTurno = 0;
+
+        this.Vida = 20;
     }
 
     public void CargarMazo(List<ModeloCriatura> cartasIniciales)
@@ -117,5 +121,11 @@ public class ModeloJugador
         {
             Mano.Remove(carta);
         }
+    }
+
+    public void RecibirDanio(int cantidad)
+    {
+        Vida -= cantidad;
+        if (Vida < 0) Vida = 0;
     }
 }

@@ -8,12 +8,16 @@ public class ModeloCriatura : ModeloCarta
     public int VidaActual { get; private set; }
     public int VidaMaxima { get; private set; }
 
+    public bool PuedeAtacar { get; set; }
+
     public ModeloCriatura(int id, string nombre, int coste, int ataque, int vida)
-        : base(id, nombre, coste)
+            : base(id, nombre, coste)
     {
         this.Ataque = ataque;
         this.VidaMaxima = vida;
         this.VidaActual = vida;
+
+        this.PuedeAtacar = false;
     }
 
     public void RecibirDanio(int danio)

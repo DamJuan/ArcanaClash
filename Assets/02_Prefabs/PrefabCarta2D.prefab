@@ -358,6 +358,8 @@ GameObject:
   - component: {fileID: 3784794826757996857}
   - component: {fileID: 8803692671151677899}
   - component: {fileID: 2441662485439084116}
+  - component: {fileID: -8783845993121863588}
+  - component: {fileID: -409837523697902797}
   m_Layer: 5
   m_Name: PrefabCarta2D
   m_TagString: Untagged
@@ -492,6 +494,34 @@ MonoBehaviour:
   DescriptionText: {fileID: 2006910018894140614}
   ImagenArte: {fileID: 1420816808599011423}
   FondoCarta: {fileID: 2106299878322062113}
+  AlturaAlColocar: 0.2
+  EscalaEnTablero: 0.015
+--- !u!225 &-8783845993121863588
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5435968868982950622}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &-409837523697902797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5435968868982950622}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab0c896362b6ea428ac0af5ef36dc30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VistaCriatura
+  LifeText: {fileID: 3316675456540366363}
+  ImagenArte: {fileID: 1420816808599011423}
 --- !u!1 &7602682962125072022
 GameObject:
   m_ObjectHideFlags: 0

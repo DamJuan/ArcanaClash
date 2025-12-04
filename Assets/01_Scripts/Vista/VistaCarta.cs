@@ -32,11 +32,17 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
     private Camera camaraPrincipal;
     private bool arrastrando = false;
     private Collider miCollider;
+    private CanvasGroup miCanvasGroup;
+
+    public float AlturaAlColocar = 0.05f;
+    public float EscalaEnTablero = 0.006f;
 
     void Start()
     {
         camaraPrincipal = Camera.main;
         miCollider = GetComponent<Collider>();
+        miCanvasGroup = GetComponent<CanvasGroup>();
+
         GameObject objZoom = GameObject.Find("PuntoZoom");
         if (objZoom != null) puntoZoom = objZoom.transform;
     }
@@ -56,24 +62,13 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
         string ruta = "Imagenes/" + modelo.Nombre;
 
-        Debug.Log($"Buscando imagen en: '{ruta}'");
-
         Texture imagenCargada = Resources.Load<Texture>(ruta);
 
-        if (imagenCargada == null)
-        {
-            Debug.LogError($" FALLO: No existe el archivo en 'Assets/Resources/{ruta}'");
-        }
-        else
-        {
-            Debug.Log($" ÉXITO: Imagen encontrada. Asignando a RawImage...");
             if (ImagenArte != null)
             {
                 ImagenArte.texture = imagenCargada;
                 ImagenArte.color = Color.white;
             }
-            else Debug.LogError(" FALLO: La variable 'ImagenArte' está vacía en el Prefab.");
-        }
 
     }
 
@@ -105,6 +100,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         posicionOriginal = transform.position;
 
         if (miCollider != null) miCollider.enabled = false;
+        if (miCanvasGroup != null) miCanvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -118,20 +114,43 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
     public void OnEndDrag(PointerEventData eventData)
     {
         arrastrando = false;
+
         Ray rayo = camaraPrincipal.ScreenPointToRay(eventData.position);
         RaycastHit golpe;
 
-        if (Physics.Raycast(rayo, out golpe))
-        {
-            InfoCasilla casillaDetectada = golpe.collider.GetComponent<InfoCasilla>();
-            bool quedanJugadas = ControladorPartida.Instancia.JugadorLocal.PuedeJugarCarta();
+        int capaTablero = 1 << LayerMask.NameToLayer("Tablero");
 
-            if (casillaDetectada != null && !casillaDetectada.EstaOcupada && casillaDetectada.EsTerritorioAliado && quedanJugadas)
+        if (Physics.Raycast(rayo, out golpe, Mathf.Infinity, capaTablero))
+        {
+            InfoCasilla casillaDetectada = golpe.collider.GetComponentInParent<InfoCasilla>();
+
+            ModeloJugador jugador = ControladorPartida.Instancia.JugadorLocal;
+
+
+            bool esMiTerritorio = casillaDetectada != null && casillaDetectada.EsTerritorioAliado;
+            bool estaVacia = casillaDetectada != null && !casillaDetectada.EstaOcupada;
+            bool tengoJugadas = jugador.PuedeJugarCarta();
+            bool tengoMana = jugador.MagiaActual >= miModelo.CosteMagia;
+
+
+            if (esMiTerritorio && estaVacia && tengoJugadas && tengoMana)
             {
                 JugarCartaEnCasilla(casillaDetectada);
-                ControladorPartida.Instancia.JugadorLocal.RegistrarJugada();
+
+                jugador.GastarMagia(miModelo.CosteMagia);
+                jugador.RegistrarJugada();
+                ControladorPartida.Instancia.ActualizarUI();
+
                 if (miCollider != null) miCollider.enabled = true;
                 return;
+            }
+            else
+            {
+                // Mensajes de error para saber qué falla
+                if (!tengoMana) Debug.Log("¡No tienes suficiente maná!");
+                else if (!esMiTerritorio) Debug.Log("Territorio enemigo.");
+                else if (!estaVacia) Debug.Log("Casilla ocupada.");
+                else if (!tengoJugadas) Debug.Log("Ya has jugado 4 cartas.");
             }
         }
 
@@ -203,28 +222,24 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
     private void JugarCartaEnCasilla(InfoCasilla casilla)
     {
-        Debug.Log("¡Carta jugada en la casilla: " + casilla.name + "!");
-
-        // Muevo la carta visualmente encima de la casilla
-        transform.position = casilla.transform.position + Vector3.up * 0.05f;
-
-        // Hago que la carta sea hija de la casilla
+        transform.position = casilla.transform.position + Vector3.up * AlturaAlColocar;
         transform.SetParent(casilla.transform);
+        transform.rotation = Quaternion.Euler(90, 0, 0);
+        transform.localScale = new Vector3(EscalaEnTablero, EscalaEnTablero, EscalaEnTablero);
 
-        // Reseteo la rotación para que se quede plana en el suelo
-        transform.rotation = Quaternion.Euler(0, 0, 0);
-
-        transform.localScale = Vector3.one;
-
-        // Con esto le digo a la casilla que tiene algo
         if (miModelo is ModeloCriatura criatura)
         {
             casilla.RecibirCarta(criatura);
             ControladorPartida.Instancia.JugadorLocal.EliminarCartaDeMano(criatura);
+            VistaCriatura scriptMesa = GetComponent<VistaCriatura>();
+            if (scriptMesa != null)
+            {
+                scriptMesa.enabled = true;
+                scriptMesa.Inicializar(criatura);
+            }
         }
-
         Destroy(this);
-
+        Destroy(GetComponent<CanvasGroup>());
     }
 
     private void MoverCartaConRaton(Vector2 posicionPantalla)

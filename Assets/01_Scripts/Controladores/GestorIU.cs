@@ -8,14 +8,11 @@ public class GestorUI : MonoBehaviour
 
     public GameObject PanelInfo;
 
-    public TextMeshProUGUI TxtNombre;
-    public TextMeshProUGUI TxtDescripcion;
-    public TextMeshProUGUI TxtCoste;
-    public TextMeshProUGUI TxtAtaque;
-    public TextMeshProUGUI TxtVida;
-
     public TextMeshProUGUI TxtManaJuego;
-    public Button BtnPasarTurno; 
+    public Button BtnPasarTurno;
+
+    public TextMeshProUGUI TxtVidaJugador;
+    public TextMeshProUGUI TxtVidaEnemigo;
 
     void Awake()
     {
@@ -26,11 +23,17 @@ public class GestorUI : MonoBehaviour
         if (PanelInfo != null) PanelInfo.SetActive(false);
     }
 
+    public void ActualizarVidas(int vidaJugador, int vidaEnemigo)
+    {
+        if (TxtVidaJugador != null) TxtVidaJugador.text = "YO: " + vidaJugador;
+        if (TxtVidaEnemigo != null) TxtVidaEnemigo.text = "RIVAL: " + vidaEnemigo;
+    }
+
     public void ActualizarMana(int actual, int maximo)
     {
         if (TxtManaJuego != null)
         {
-            TxtManaJuego.text = $"MANÁ: {actual}/{maximo}";
+            TxtManaJuego.text = $"{actual}/{maximo}";
         }
     }
 
@@ -38,31 +41,11 @@ public class GestorUI : MonoBehaviour
     {
         if (BtnPasarTurno != null) BtnPasarTurno.interactable = activo;
     }
-
-    public void MostrarInformacion(ModeloCarta modelo)
-    {
-        // Esto abre el panel y rellena los datos
-        PanelInfo.SetActive(true);
-
-        TxtNombre.text = modelo.Nombre;
-        TxtCoste.text = modelo.CosteMagia.ToString();
-
-        TxtDescripcion.text = "Carta de tipo " + modelo.Tipo;
-
-        if (modelo is ModeloCriatura criatura)
-        {
-            TxtAtaque.text = criatura.Ataque.ToString();
-            TxtVida.text = criatura.VidaActual.ToString();
-        }
-        else
-        {
-            TxtAtaque.text = "-";
-            TxtVida.text = "-";
-        }
-    }
-
     public void CerrarPanel()
     {
-        PanelInfo.SetActive(false);
+        if (PanelInfo != null)
+        {
+            PanelInfo.SetActive(false);
+        }
     }
 }
