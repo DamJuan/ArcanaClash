@@ -6,6 +6,9 @@ using UnityEngine.EventSystems;
 public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
 
+    public int CoordenadaX;
+    public int CoordenadaY;
+
     public bool EsTerritorioAliado = false;
 
     public Material MaterialLlanura;
@@ -19,6 +22,7 @@ public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private Renderer renderizador;
     private ModeloCasilla modelo;
     private Material materialOriginal;
+
 
     // El awake lo uso para obtener el renderizador del objeto.
     void Awake()

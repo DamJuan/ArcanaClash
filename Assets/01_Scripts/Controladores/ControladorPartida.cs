@@ -134,6 +134,10 @@ public class ControladorPartida : MonoBehaviour
                 InfoCasilla vistaCasilla = nuevaCasilla.GetComponent<InfoCasilla>();
                 if (vistaCasilla != null)
                 {
+
+                    vistaCasilla.CoordenadaX = x;
+                    vistaCasilla.CoordenadaY = y;
+
                     vistaCasilla.Configurar(modelo);
                     // Fila 0 y 1 son del jugador 1 la fila 2 y 3 del jugador 2
                     if (y < 2)
@@ -188,6 +192,8 @@ public class ControladorPartida : MonoBehaviour
     IEnumerator TurnoIA()
     {
         yield return new WaitForSeconds(1.0f); // Pausa para que se note el cambio de turno
+
+        DespertarCriaturasIA();
 
         jugador2.SubirManaMaximo();
         jugador2.RestaurarMagia();
@@ -282,6 +288,11 @@ public class ControladorPartida : MonoBehaviour
 
             cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
 
+            if (AudioManager.Instancia != null)
+            {
+                AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+            }
+
             VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
             if (vista != null)
             {
@@ -317,8 +328,28 @@ public class ControladorPartida : MonoBehaviour
                 if (c.EstaOcupada) c.CriaturaEnCasilla.PuedeAtacar = true;
             }
         }
-
     }
+
+
+        void DespertarCriaturasIA()
+        {
+            foreach (Transform hijoCasilla in ContenedorTablero)
+            {
+                InfoCasilla infoCasilla = hijoCasilla.GetComponent<InfoCasilla>();
+                VistaCriatura criatura = hijoCasilla.GetComponentInChildren<VistaCriatura>();
+
+                if (criatura != null && infoCasilla != null && !infoCasilla.EsTerritorioAliado)
+                {
+                    criatura.Despertar();
+
+                    ModeloCasilla modelo = tableroLogico.ObtenerCasilla(infoCasilla.CoordenadaX, infoCasilla.CoordenadaY);
+                    if (modelo.EstaOcupada)
+                    {
+                        modelo.CriaturaEnCasilla.PuedeAtacar = true;
+                    }
+                }
+            }
+        }
 
     public void MatarCriatura(ModeloCriatura criatura, ModeloCasilla casilla)
     {

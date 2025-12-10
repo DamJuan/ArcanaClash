@@ -137,9 +137,13 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
             {
                 JugarCartaEnCasilla(casillaDetectada);
 
-                jugador.GastarMagia(miModelo.CosteMagia);
-                jugador.RegistrarJugada();
-                ControladorPartida.Instancia.ActualizarUI();
+                if (AudioManager.Instancia != null)
+                {
+                    AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+                    jugador.GastarMagia(miModelo.CosteMagia);
+                    jugador.RegistrarJugada();
+                    ControladorPartida.Instancia.ActualizarUI();
+                }
 
                 if (miCollider != null) miCollider.enabled = true;
                 return;
