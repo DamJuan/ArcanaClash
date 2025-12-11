@@ -35,18 +35,26 @@ public class GestorUI : MonoBehaviour
     {
         CerrarInspeccion();
 
-        cartaClonada = Instantiate(PrefabCartaVisual, posicionInicial, Quaternion.Euler(90, 0, 0));
+        if (PrefabCartaVisual != null && PuntoObservacion != null)
+        {
 
+            cartaClonada = Instantiate(PrefabCartaVisual, PuntoObservacion.position, PuntoObservacion.rotation);
+       
+            VistaCarta vistaCarta = cartaClonada.GetComponent<VistaCarta>();
+            if (vistaCarta != null)
+            {
+                vistaCarta.Configurar(modelo);
+                Destroy(vistaCarta); 
+                Destroy(cartaClonada.GetComponent<Collider>());
+            }
+
+            cartaClonada.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
+
+            if (AudioManager.Instancia != null)
+                AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+
+        }
         
-        Destroy(cartaClonada.GetComponent<VistaCarta>());
-        Destroy(cartaClonada.GetComponent<VistaCriatura>());
-        Destroy(cartaClonada.GetComponent<Collider>()); 
-
-        VistaCarta vistaTemp = cartaClonada.GetComponent<VistaCarta>();
-        if (vistaTemp != null) vistaTemp.Configurar(modelo);
-
-        // 5. Iniciamos la animación de viaje hacia la cámara
-        StartCoroutine(AnimarViajeCarta(cartaClonada.transform));
     }
 
     IEnumerator AnimarViajeCarta(Transform carta)

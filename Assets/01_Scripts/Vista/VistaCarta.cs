@@ -95,7 +95,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-
+        posicionOriginal = transform.position;
 
         if (ControladorPartida.Instancia != null && !ControladorPartida.Instancia.EsTurnoDeJugador)
         {
@@ -106,7 +106,6 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         if (enZoom) DesactivarZoom();
 
         arrastrando = true;
-        posicionOriginal = transform.position;
 
         if (miCollider != null) miCollider.enabled = false;
         if (miCanvasGroup != null) miCanvasGroup.blocksRaycasts = false;
@@ -184,6 +183,11 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         }
 
         transform.position = posicionOriginal;
+        if (miCanvasGroup != null)
+        {
+            miCanvasGroup.alpha = 1f;
+            miCanvasGroup.blocksRaycasts = true;
+        }
         if (miCollider != null) miCollider.enabled = true;
     }
 
