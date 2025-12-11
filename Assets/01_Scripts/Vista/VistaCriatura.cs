@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class VistaCriatura : MonoBehaviour
 {
@@ -40,5 +41,16 @@ public class VistaCriatura : MonoBehaviour
     public void Despertar()
     {
         PonerEnReposo(false);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (miModelo != null && GestorUI.Instancia != null)
+        {
+            GestorUI.Instancia.InspeccionarCarta(miModelo, transform.position);
+
+            if (AudioManager.Instancia != null)
+                AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+        }
     }
 }

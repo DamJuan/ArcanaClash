@@ -37,6 +37,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
     public float AlturaAlColocar = 0.05f;
     public float EscalaEnTablero = 0.006f;
 
+
     void Start()
     {
         camaraPrincipal = Camera.main;
@@ -94,6 +95,14 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+
+
+        if (ControladorPartida.Instancia != null && !ControladorPartida.Instancia.EsTurnoDeJugador)
+        {
+            Debug.Log("¡Espera a tu turno!");
+            return;
+        }
+
         if (enZoom) DesactivarZoom();
 
         arrastrando = true;
@@ -113,6 +122,21 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
     public void OnEndDrag(PointerEventData eventData)
     {
+
+        if (ControladorPartida.Instancia != null && !ControladorPartida.Instancia.EsTurnoDeJugador)
+        {
+            transform.position = posicionOriginal;
+            if (miCanvasGroup != null)
+            {
+                miCanvasGroup.alpha = 1f;
+                miCanvasGroup.blocksRaycasts = true;
+            }
+
+            if (miCollider != null) miCollider.enabled = true;
+
+            return;
+        }
+
         arrastrando = false;
 
         Ray rayo = camaraPrincipal.ScreenPointToRay(eventData.position);
@@ -137,12 +161,13 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
             {
                 JugarCartaEnCasilla(casillaDetectada);
 
+                jugador.GastarMagia(miModelo.CosteMagia);
+                jugador.RegistrarJugada();
+                ControladorPartida.Instancia.ActualizarUI();
+
                 if (AudioManager.Instancia != null)
                 {
                     AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
-                    jugador.GastarMagia(miModelo.CosteMagia);
-                    jugador.RegistrarJugada();
-                    ControladorPartida.Instancia.ActualizarUI();
                 }
 
                 if (miCollider != null) miCollider.enabled = true;
@@ -242,6 +267,11 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
                 scriptMesa.Inicializar(criatura);
             }
         }
+
+        if (miCollider != null) miCollider.enabled = true;
+        CanvasGroup cg = GetComponent<CanvasGroup>();
+        if (cg != null) Destroy(cg);
+
         Destroy(this);
         Destroy(GetComponent<CanvasGroup>());
     }

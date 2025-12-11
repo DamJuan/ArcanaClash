@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 94b1d5ca748d1d54aac0d2277bf3e59f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - MaterialLlanura: {fileID: 2100000, guid: f757065600cb9e84f8b9e71b6adf6e74, type: 2}
+  - MaterialMaiz: {fileID: 2100000, guid: 2fd6d3c124aa08540aa03005cdbe9488, type: 2}
+  - MaterialPantano: {fileID: 2100000, guid: 15f3ebc3f4c97c74f84d6081ec28cc02, type: 2}
+  - MaterialResaltado: {fileID: 2100000, guid: a6dc8e72605018c46ac3409dd9747b19, type: 2}
+  - MaterialRojo: {fileID: 2100000, guid: c87523bfe0199034babbdce02b81e69f, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

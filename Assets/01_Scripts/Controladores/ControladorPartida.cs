@@ -441,5 +441,7 @@ public class ControladorPartida : MonoBehaviour
         }
     }
 
+    public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
+
 
 }

@@ -1,92 +1,56 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-
-
 public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-
+    [Header("Datos Lógicos")]
     public int CoordenadaX;
     public int CoordenadaY;
-
     public bool EsTerritorioAliado = false;
 
-    public Material MaterialLlanura;
-    public Material MaterialMaiz;
-    public Material MaterialPantano;
+    [Header("Configuración Visual")]
+    public Color ColorInvisible = new Color(1, 1, 1, 0.05f);
+    public Color ColorAliado = new Color(0, 1, 1, 0.4f);
+    public Color ColorEnemigo = new Color(1, 0, 0, 0.4f);
 
-    public Material MaterialResaltado;
-    public Material MaterialRojo;
-
-    // Esti cambia el material del objeto 3D ya que el tablero puede tener distintos tipos de terreno.
     private Renderer renderizador;
     private ModeloCasilla modelo;
-    private Material materialOriginal;
 
-
-    // El awake lo uso para obtener el renderizador del objeto.
     void Awake()
     {
-        renderizador = GetComponent<Renderer>();
+        renderizador = GetComponentInChildren<Renderer>();
+
+        if (renderizador != null)
+        {
+            renderizador.material.color = ColorInvisible;
+        }
     }
 
     public void Configurar(ModeloCasilla modeloAsignado)
     {
         this.modelo = modeloAsignado;
+    }
 
-        if (this.modelo != null)
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (eventData.dragging && renderizador != null)
         {
-            this.modelo.EventoTerrenoCambiado += ActualizarAspecto;
-            ActualizarAspecto(this.modelo.TipoActual);
+            if (!EstaOcupada && EsTerritorioAliado)
+            {
+                renderizador.material.color = ColorAliado;
+            }
+            else
+            {
+                renderizador.material.color = ColorEnemigo;
+            }
         }
     }
 
-    private void ActualizarAspecto(TipoTerreno nuevoTipo)
+    public void OnPointerExit(PointerEventData eventData)
     {
-        Material materialACambiar = null;
-
-        switch (nuevoTipo)
+        if (renderizador != null)
         {
-            case TipoTerreno.Maiz:
-                materialACambiar = MaterialMaiz;
-                break;
-            case TipoTerreno.Pantano:
-                materialACambiar = MaterialPantano;
-                break;
-            case TipoTerreno.Llanura:
-            default:
-                materialACambiar = MaterialLlanura;
-                break;
-        }
-
-        if (renderizador != null && materialACambiar != null)
-        {
-            renderizador.material = materialACambiar;
-            materialOriginal = materialACambiar;
-        }
-    }
-
-   
-    public void OnPointerClick(PointerEventData eventData)
-    {
-
-        if (modelo == null)
-        {
-            Debug.LogError("Has hecho clic en una casilla sin datos. Bórrala de la escena: " + gameObject.name);
-            return;
-        }
-
-        Debug.Log($"Clic en casilla: ({modelo.CoordenadaX}, {modelo.CoordenadaY})");
-
-        // Demomento solo muestro un mensaje en consola.
-    }
-
-    void OnDestroy()
-    {
-
-        if (this.modelo != null)
-        {
-            this.modelo.EventoTerrenoCambiado -= ActualizarAspecto;
+            renderizador.material.color = ColorInvisible;
         }
     }
 
@@ -94,10 +58,7 @@ public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         get
         {
-            if (modelo == null)
-            {
-                return true;
-            }
+            if (modelo == null) return true;
             return modelo.EstaOcupada;
         }
     }
@@ -107,27 +68,6 @@ public class InfoCasilla : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (modelo != null)
         {
             modelo.AsignarCriatura(carta);
-        }
-    }
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (!EstaOcupada && EsTerritorioAliado && eventData.dragging)
-        {
-            renderizador.material = MaterialResaltado;
-        }
-        else if (!EsTerritorioAliado && eventData.dragging)
-        {
-            renderizador.material = MaterialRojo;
-        }
-    }
-
-
-        public void OnPointerExit(PointerEventData eventData)
-    {
-        // Volvemos al estado normal
-        if (renderizador != null && materialOriginal != null)
-        {
-            renderizador.material = materialOriginal;
         }
     }
 }
