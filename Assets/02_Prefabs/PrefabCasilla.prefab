@@ -70,7 +70,7 @@ MonoBehaviour:
   CoordenadaX: 0
   CoordenadaY: 0
   EsTerritorioAliado: 0
-  ColorInvisible: {r: 1, g: 1, b: 1, a: 0.05}
+  ColorInvisible: {r: 1, g: 1, b: 1, a: 0}
   ColorAliado: {r: 0, g: 1, b: 1, a: 0.4}
   ColorEnemigo: {r: 1, g: 0, b: 0, a: 0.4}
 --- !u!1 &7165549795468983818

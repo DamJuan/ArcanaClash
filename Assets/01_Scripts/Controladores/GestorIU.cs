@@ -1,8 +1,9 @@
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GestorUI : MonoBehaviour
 {
@@ -29,6 +30,7 @@ public class GestorUI : MonoBehaviour
 
         //Empiezo con el panel cerrado
         if (PanelFinPartida != null) PanelFinPartida.SetActive(false);
+        if (PanelInfo != null) PanelInfo.SetActive(false);
     }
 
     public void InspeccionarCarta(ModeloCarta modelo, Vector3 posicionInicial)
@@ -38,20 +40,21 @@ public class GestorUI : MonoBehaviour
         if (PrefabCartaVisual != null && PuntoObservacion != null)
         {
 
-            cartaClonada = Instantiate(PrefabCartaVisual, PuntoObservacion.position, PuntoObservacion.rotation);
-       
+            cartaClonada = Instantiate(PrefabCartaVisual, posicionInicial, Quaternion.Euler(90, 0, 0));
+
             VistaCarta vistaCarta = cartaClonada.GetComponent<VistaCarta>();
             if (vistaCarta != null)
             {
                 vistaCarta.Configurar(modelo);
                 Destroy(vistaCarta); 
                 Destroy(cartaClonada.GetComponent<Collider>());
+                Destroy(cartaClonada.GetComponent<CanvasGroup>());
             }
-
-            cartaClonada.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
 
             if (AudioManager.Instancia != null)
                 AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+
+            StartCoroutine(AnimarViajeCarta(cartaClonada.transform));
 
         }
         
@@ -124,6 +127,58 @@ public class GestorUI : MonoBehaviour
         CerrarInspeccion();
 
         if (PanelInfo != null) PanelInfo.SetActive(false);
+    }
+
+    public void MostrarPantallaFin(bool victoria)
+    {
+        if (PanelFinPartida != null)
+        {
+            PanelFinPartida.SetActive(true);
+
+            if (TxtMensajeFin != null)
+            {
+                if (victoria)
+                {
+                    TxtMensajeFin.text = "¡VICTORIA!";
+                    TxtMensajeFin.color = Color.green;
+                }
+                else
+                {
+                    TxtMensajeFin.text = "DERROTA...";
+                    TxtMensajeFin.color = Color.red;
+                }
+            }
+        }
+    }
+
+    public void ReiniciarJuego()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void Update()
+    {
+        if (cartaClonada != null)
+        {
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (hit.collider.GetComponent<VistaCriatura>() == null)
+                    {
+                        CerrarInspeccion();
+                    } 
+                }
+                else
+                {
+                    // Si no tocamos NADA (clic al aire), cerramos también.
+                    CerrarInspeccion();
+                }
+            }
+        }
     }
 
 }

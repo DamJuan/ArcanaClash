@@ -437,7 +437,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &3784794826757996857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -494,7 +494,7 @@ MonoBehaviour:
   DescriptionText: {fileID: 2006910018894140614}
   ImagenArte: {fileID: 1420816808599011423}
   FondoCarta: {fileID: 2106299878322062113}
-  AlturaAlColocar: 0.2
+  AlturaAlColocar: 0.6
   EscalaEnTablero: 0.015
 --- !u!225 &-8783845993121863588
 CanvasGroup:

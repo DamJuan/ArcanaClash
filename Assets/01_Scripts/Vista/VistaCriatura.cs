@@ -3,9 +3,8 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class VistaCriatura : MonoBehaviour
+public class VistaCriatura : MonoBehaviour, IPointerClickHandler
 {
-    [Header("Referencias Visuales")]
     public TextMeshProUGUI LifeText;
     public RawImage ImagenArte;        // Para ponerla en gris si duerme
 
@@ -16,22 +15,18 @@ public class VistaCriatura : MonoBehaviour
     {
         this.miModelo = modelo;
         ActualizarVisuales();
-
         PonerEnReposo(true);
     }
 
     public void ActualizarVisuales()
     {
-        if (miModelo != null)
-        {
-            if (LifeText != null) LifeText.text = miModelo.VidaActual.ToString();
-        }
+        if (miModelo != null && LifeText != null)
+            LifeText.text = miModelo.VidaActual.ToString();
     }
 
     public void PonerEnReposo(bool dormir)
     {
         estaDormida = dormir;
-
         if (ImagenArte != null)
         {
             ImagenArte.color = dormir ? Color.gray : Color.white;
@@ -45,12 +40,19 @@ public class VistaCriatura : MonoBehaviour
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (miModelo != null && GestorUI.Instancia != null)
-        {
-            GestorUI.Instancia.InspeccionarCarta(miModelo, transform.position);
 
-            if (AudioManager.Instancia != null)
-                AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
+        Debug.Log("1. ¡Clic detectado en VistaCriatura!");
+
+        if (GestorUI.Instancia != null)
+        {
+            Debug.Log("2. GestorUI encontrado."); // <--- SEGUNDO CHECK
+            GestorUI.Instancia.CerrarInspeccion();
+
+            if (miModelo != null)
+            {
+                Debug.Log("3. Modelo existe. Llamando a inspeccionar..."); // <--- TERCER CHECK
+                GestorUI.Instancia.InspeccionarCarta(miModelo, transform.position);
+            }
         }
     }
 }

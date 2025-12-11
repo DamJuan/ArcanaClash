@@ -306,6 +306,7 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -449,6 +450,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &330585549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd154bafdbf16e442a78bb3800f882dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugClicks
 --- !u!4 &372240504 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8bae5a98065a5e944af4fdc448bafa46, type: 3}
@@ -1421,11 +1434,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0cb898d8a462a944ba646b4d8f260e85, type: 3}
       propertyPath: m_Name
-      value: model
+      value: Mapa
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0cb898d8a462a944ba646b4d8f260e85, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1607436755}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0cb898d8a462a944ba646b4d8f260e85, type: 3}
 --- !u!1 &1058571070
@@ -2494,6 +2510,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8bae5a98065a5e944af4fdc448bafa46, type: 3}
+--- !u!4 &1557449754 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0cb898d8a462a944ba646b4d8f260e85, type: 3}
+  m_PrefabInstance: {fileID: 985585676}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1594782855
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2575,8 +2596,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1607436754}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.49122, y: 1.77, z: 3.42}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 5.26122, y: 2.3200002, z: -1.6400001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2601,7 +2622,7 @@ Transform:
   - {fileID: 281689019}
   - {fileID: 1632249310}
   - {fileID: 421964062}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1557449754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1632249310 stripped
 Transform:
@@ -3096,7 +3117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestorUI
   PuntoObservacion: {fileID: 2069196120}
-  PrefabCartaVisual: {fileID: 0}
+  PrefabCartaVisual: {fileID: 5435968868982950622, guid: 08722bd5c12886d468c6cef78a0ec4c5, type: 3}
   TxtManaJuego: {fileID: 2061373207}
   BtnPasarTurno: {fileID: 1241878799}
   TxtVidaJugador: {fileID: 372805249}
@@ -3443,4 +3464,3 @@ SceneRoots:
   - {fileID: 2041051056}
   - {fileID: 1411450498}
   - {fileID: 985585676}
-  - {fileID: 1607436755}

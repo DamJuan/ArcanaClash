@@ -1,6 +1,7 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 
 //Esto lo que hace es crear la partida, la logica del tablero y pinta casillas
@@ -270,23 +271,20 @@ public class ControladorPartida : MonoBehaviour
         return null;
     }
 
-    // METODO PARA QUE LA IA JUEGUE UNA CARTA y ACTUALICE LA PARTE VISUAL
     void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
     {
-        // Buscamos el objeto visual de la casilla donde vamos a poner la carta lo busco por nombre demomento 
         GameObject objCasilla = GameObject.Find($"Casilla_{casillaLogica.CoordenadaX}_{casillaLogica.CoordenadaY}");
 
         if (objCasilla != null)
         {
             Transform transformCasilla = objCasilla.transform;
 
-            // Creo la carta directamente en la casilla
             GameObject cartaIA = Instantiate(PrefabCarta, transformCasilla);
-
-            cartaIA.transform.localPosition = Vector3.up * 0.2f;
+            cartaIA.transform.localPosition = Vector3.up * 0.7f;
             cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
-
             cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
+
+            cartaIA.layer = LayerMask.NameToLayer("Default");
 
             if (AudioManager.Instancia != null)
             {
@@ -297,10 +295,25 @@ public class ControladorPartida : MonoBehaviour
             if (vista != null)
             {
                 vista.Configurar(carta);
-                // Quito el componente de interacción para que no se pueda tocar la carta de la IA
                 Destroy(vista);
             }
 
+            VistaCriatura vistaCriatura = cartaIA.GetComponent<VistaCriatura>();
+            if (vistaCriatura != null)
+            {
+                vistaCriatura.enabled = true;
+                vistaCriatura.Inicializar(carta);
+            }
+
+            Destroy(cartaIA.GetComponent<GraphicRaycaster>());
+            if (cartaIA.GetComponent<CanvasGroup>() != null) Destroy(cartaIA.GetComponent<CanvasGroup>());
+
+            BoxCollider col = cartaIA.GetComponent<BoxCollider>();
+            if (col != null)
+            {
+                col.enabled = true;
+                col.size = new Vector3(col.size.x, col.size.y, 10f);
+            }
             InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
             if (info != null) info.RecibirCarta(carta);
         }

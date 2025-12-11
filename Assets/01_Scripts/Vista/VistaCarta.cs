@@ -260,6 +260,8 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         transform.rotation = Quaternion.Euler(90, 0, 0);
         transform.localScale = new Vector3(EscalaEnTablero, EscalaEnTablero, EscalaEnTablero);
 
+        gameObject.layer = LayerMask.NameToLayer("Default");
+
         if (miModelo is ModeloCriatura criatura)
         {
             casilla.RecibirCarta(criatura);
@@ -277,7 +279,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         if (cg != null) Destroy(cg);
 
         Destroy(this);
-        Destroy(GetComponent<CanvasGroup>());
+        Destroy(GetComponent<GraphicRaycaster>());
     }
 
     private void MoverCartaConRaton(Vector2 posicionPantalla)
