@@ -303,6 +303,8 @@ public class ControladorPartida : MonoBehaviour
             {
                 vistaCriatura.enabled = true;
                 vistaCriatura.Inicializar(carta);
+
+                vistaCriatura.PonerEnReposo(false);
             }
 
             Destroy(cartaIA.GetComponent<GraphicRaycaster>());
@@ -455,6 +457,8 @@ public class ControladorPartida : MonoBehaviour
     }
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
+
+
 
 
 }

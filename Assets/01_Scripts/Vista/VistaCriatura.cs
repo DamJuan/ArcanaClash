@@ -5,8 +5,18 @@ using UnityEngine.EventSystems;
 
 public class VistaCriatura : MonoBehaviour, IPointerClickHandler
 {
-    public TextMeshProUGUI LifeText;
-    public RawImage ImagenArte;        // Para ponerla en gris si duerme
+    [Header("CONTROL VISUAL")]
+    public GameObject GrupoVisual2D;
+    public GameObject GrupoVisual3D;
+
+    [Header("TEXTOS DEL HOLOGRAMA (3D)")]
+    public TextMeshProUGUI TxtVida3D;
+    public TextMeshProUGUI TxtAtaque3D;
+    public TextMeshProUGUI TxtNombre3D;
+
+    [Header("TEXTOS DE LA CARTA (2D)")]
+    public TextMeshProUGUI TxtVida2D;
+    public TextMeshProUGUI TxtAtaque2D;
 
     private ModeloCriatura miModelo;
     private bool estaDormida = true;
@@ -14,22 +24,42 @@ public class VistaCriatura : MonoBehaviour, IPointerClickHandler
     public void Inicializar(ModeloCriatura modelo)
     {
         this.miModelo = modelo;
+
         ActualizarVisuales();
+
         PonerEnReposo(true);
     }
 
     public void ActualizarVisuales()
     {
-        if (miModelo != null && LifeText != null)
-            LifeText.text = miModelo.VidaActual.ToString();
+        if (miModelo != null)
+        {
+            if (TxtVida2D != null) TxtVida2D.text = miModelo.VidaActual.ToString();
+            if (TxtAtaque2D != null) TxtAtaque2D.text = miModelo.Ataque.ToString();
+
+            if (TxtVida3D != null) TxtVida3D.text = miModelo.VidaActual.ToString();
+            if (TxtAtaque3D != null) TxtAtaque3D.text = miModelo.Ataque.ToString();
+            if (TxtNombre3D != null) TxtNombre3D.text = miModelo.Nombre;
+        }
     }
 
     public void PonerEnReposo(bool dormir)
     {
         estaDormida = dormir;
-        if (ImagenArte != null)
+
+        if (dormir)
         {
-            ImagenArte.color = dormir ? Color.gray : Color.white;
+            if (GrupoVisual2D != null) GrupoVisual2D.SetActive(true);
+            if (GrupoVisual3D != null) GrupoVisual3D.SetActive(false);
+
+            transform.localRotation = Quaternion.Euler(90, 0, 0);
+        }
+        else
+        {
+            if (GrupoVisual2D != null) GrupoVisual2D.SetActive(false);
+            if (GrupoVisual3D != null) GrupoVisual3D.SetActive(true);
+
+            transform.localRotation = Quaternion.Euler(0, 0, 0);
         }
     }
 
@@ -40,19 +70,12 @@ public class VistaCriatura : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-
-        Debug.Log("1. ¡Clic detectado en VistaCriatura!");
-
-        if (GestorUI.Instancia != null)
+        if (GestorUI.Instancia != null && miModelo != null)
         {
-            Debug.Log("2. GestorUI encontrado."); // <--- SEGUNDO CHECK
             GestorUI.Instancia.CerrarInspeccion();
-
-            if (miModelo != null)
-            {
-                Debug.Log("3. Modelo existe. Llamando a inspeccionar..."); // <--- TERCER CHECK
-                GestorUI.Instancia.InspeccionarCarta(miModelo, transform.position);
-            }
+            GestorUI.Instancia.InspeccionarCarta(miModelo, transform.position);
         }
     }
+
+
 }

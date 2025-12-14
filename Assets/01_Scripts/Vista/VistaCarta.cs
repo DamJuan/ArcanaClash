@@ -257,7 +257,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
     {
         transform.position = casilla.transform.position + Vector3.up * AlturaAlColocar;
         transform.SetParent(casilla.transform);
-        transform.rotation = Quaternion.Euler(90, 0, 0);
+        transform.localRotation = Quaternion.Euler(90, 0, 0);
         transform.localScale = new Vector3(EscalaEnTablero, EscalaEnTablero, EscalaEnTablero);
 
         gameObject.layer = LayerMask.NameToLayer("Default");
@@ -274,12 +274,9 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
             }
         }
 
-        if (miCollider != null) miCollider.enabled = true;
-        CanvasGroup cg = GetComponent<CanvasGroup>();
-        if (cg != null) Destroy(cg);
-
-        Destroy(this);
         Destroy(GetComponent<GraphicRaycaster>());
+        if (GetComponent<CanvasGroup>() != null) Destroy(GetComponent<CanvasGroup>());
+        Destroy(this);
     }
 
     private void MoverCartaConRaton(Vector2 posicionPantalla)
