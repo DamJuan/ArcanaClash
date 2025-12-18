@@ -6,8 +6,10 @@ MonoImporter:
   defaultReferences:
   - PrefabCasilla: {fileID: 1396850081008200443, guid: b82037636c77e9a40b262630751cee5a, type: 3}
   - ContenedorTablero: {instanceID: 0}
-  - PrefabCarta: {fileID: 4907334076683984663, guid: af719cb5f678e8d478bfd8e938ddde58, type: 3}
+  - PrefabCarta: {instanceID: 0}
   - ContenedorManoJugador: {instanceID: 0}
+  - lector: {instanceID: 0}
+  - materialHologramaIA: {fileID: 2100000, guid: bad62e813e120114498f22393d64b600, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

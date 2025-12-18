@@ -24,6 +24,8 @@ public class ControladorPartida : MonoBehaviour
     public LectorCSV lector;
     public static ControladorPartida Instancia;
 
+    public Material materialHologramaIA;
+
     private bool esTurnoJugador = true;
 
     void Awake()
@@ -280,10 +282,10 @@ public class ControladorPartida : MonoBehaviour
             Transform transformCasilla = objCasilla.transform;
 
             GameObject cartaIA = Instantiate(PrefabCarta, transformCasilla);
+
             cartaIA.transform.localPosition = Vector3.up * 0.7f;
             cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
             cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
-
             cartaIA.layer = LayerMask.NameToLayer("Default");
 
             if (AudioManager.Instancia != null)
@@ -304,7 +306,19 @@ public class ControladorPartida : MonoBehaviour
                 vistaCriatura.enabled = true;
                 vistaCriatura.Inicializar(carta);
 
-                vistaCriatura.PonerEnReposo(false);
+                if (materialHologramaIA != null)
+                {
+                    Renderer[] renderers = cartaIA.GetComponentsInChildren<Renderer>(true);
+                    foreach (Renderer r in renderers)
+                    {
+                        if (r is MeshRenderer || r is SkinnedMeshRenderer)
+                        {
+                            r.material = materialHologramaIA;
+                        }
+                    }
+                }
+
+                vistaCriatura.PonerEnReposo(true);
             }
 
             Destroy(cartaIA.GetComponent<GraphicRaycaster>());
@@ -316,6 +330,7 @@ public class ControladorPartida : MonoBehaviour
                 col.enabled = true;
                 col.size = new Vector3(col.size.x, col.size.y, 10f);
             }
+
             InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
             if (info != null) info.RecibirCarta(carta);
         }
@@ -346,25 +361,26 @@ public class ControladorPartida : MonoBehaviour
     }
 
 
-        void DespertarCriaturasIA()
+    void DespertarCriaturasIA()
+    {
+        foreach (Transform hijoCasilla in ContenedorTablero)
         {
-            foreach (Transform hijoCasilla in ContenedorTablero)
+            InfoCasilla infoCasilla = hijoCasilla.GetComponent<InfoCasilla>();
+            VistaCriatura criatura = hijoCasilla.GetComponentInChildren<VistaCriatura>();
+
+            if (criatura != null && infoCasilla != null && !infoCasilla.EsTerritorioAliado)
             {
-                InfoCasilla infoCasilla = hijoCasilla.GetComponent<InfoCasilla>();
-                VistaCriatura criatura = hijoCasilla.GetComponentInChildren<VistaCriatura>();
+                criatura.Despertar();
+                criatura.PonerEnReposo(false);
 
-                if (criatura != null && infoCasilla != null && !infoCasilla.EsTerritorioAliado)
+                ModeloCasilla modelo = tableroLogico.ObtenerCasilla(infoCasilla.CoordenadaX, infoCasilla.CoordenadaY);
+                if (modelo.EstaOcupada)
                 {
-                    criatura.Despertar();
-
-                    ModeloCasilla modelo = tableroLogico.ObtenerCasilla(infoCasilla.CoordenadaX, infoCasilla.CoordenadaY);
-                    if (modelo.EstaOcupada)
-                    {
-                        modelo.CriaturaEnCasilla.PuedeAtacar = true;
-                    }
+                    modelo.CriaturaEnCasilla.PuedeAtacar = true;
                 }
             }
         }
+    }
 
     public void MatarCriatura(ModeloCriatura criatura, ModeloCasilla casilla)
     {
