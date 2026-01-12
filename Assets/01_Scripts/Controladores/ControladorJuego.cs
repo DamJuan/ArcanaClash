@@ -1,24 +1,37 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ControladorJuego : MonoBehaviour
 {
+    [Header("UI")]
     public GameObject panelPausa;
+    public Slider sliderVolumen;
+    public Toggle togglePantalla;
+
     private bool estaPausado = false;
+
+    void Start()
+    {
+        float volumenGuardado = PlayerPrefs.GetFloat("volumenGuardado", 1f);
+        AudioListener.volume = volumenGuardado;
+
+        if (sliderVolumen != null)
+            sliderVolumen.value = volumenGuardado;
+
+        bool esPantallaCompleta = PlayerPrefs.GetInt("pantallaCompleta", 1) == 1;
+        Screen.fullScreen = esPantallaCompleta;
+
+        if (togglePantalla != null)
+            togglePantalla.isOn = esPantallaCompleta;
+    }
 
     void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (estaPausado)
-            {
-                Reanudar();
-            }
-            else
-            {
-                Pausar();
-            }
+            if (estaPausado) Reanudar();
+            else Pausar();
         }
     }
 
@@ -40,5 +53,17 @@ public class ControladorJuego : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MenuPrincipal");
+    }
+
+    public void CambiarVolumen(float valor)
+    {
+        AudioListener.volume = valor;
+        PlayerPrefs.SetFloat("volumenGuardado", valor);
+    }
+
+    public void ActivarPantallaCompleta(bool esCompleta)
+    {
+        Screen.fullScreen = esCompleta;
+        PlayerPrefs.SetInt("pantallaCompleta", esCompleta ? 1 : 0);
     }
 }
