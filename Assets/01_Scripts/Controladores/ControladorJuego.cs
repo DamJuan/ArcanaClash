@@ -30,8 +30,7 @@ public class ControladorJuego : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (estaPausado) Reanudar();
-            else Pausar();
+            AlternarPausa();
         }
     }
 
@@ -65,5 +64,17 @@ public class ControladorJuego : MonoBehaviour
     {
         Screen.fullScreen = esCompleta;
         PlayerPrefs.SetInt("pantallaCompleta", esCompleta ? 1 : 0);
+    }
+
+    public void AlternarPausa()
+    {
+        if (estaPausado)
+        {
+            Reanudar();
+        }
+        else
+        {
+            Pausar();
+        }
     }
 }

@@ -4,25 +4,20 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instancia;
 
-    public AudioSource FuenteMusica;
     public AudioSource FuenteEfectos;
 
-    public AudioClip MusicaFondo;
     public AudioClip SonidoJugarCarta;
 
     void Awake()
     {
-        if (Instancia == null) Instancia = this;
-        else Destroy(gameObject);
-    }
-
-    void Start()
-    {
-        if (MusicaFondo != null)
+        if (Instancia == null)
         {
-            FuenteMusica.clip = MusicaFondo;
-            FuenteMusica.loop = true;
-            FuenteMusica.Play();
+            Instancia = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 

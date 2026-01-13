@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class ControladorPartida : MonoBehaviour
 {
 
+    public List<DatosCarta> bibliotecaVisuales;
+
     public GameObject PrefabCasilla;
 
     // Esto lo hago para tener orden en las casillas
@@ -288,6 +290,18 @@ public class ControladorPartida : MonoBehaviour
             cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
             cartaIA.layer = LayerMask.NameToLayer("Default");
 
+            DatosCarta datosVisuales = BuscarVisualesPorNombre(carta.Nombre);
+            CartaSpawner spawner = cartaIA.GetComponent<CartaSpawner>();
+
+            if (spawner != null && datosVisuales != null)
+            {
+
+                spawner.Inicializar(datosVisuales);
+
+            
+                spawner.Despertar();
+            }
+
             if (AudioManager.Instancia != null)
             {
                 AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
@@ -473,6 +487,19 @@ public class ControladorPartida : MonoBehaviour
     }
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
+
+    DatosCarta BuscarVisualesPorNombre(string nombreLogico)
+    {
+        foreach (DatosCarta dato in bibliotecaVisuales)
+        {
+            if (dato.nombreCarta == nombreLogico)
+            {
+                return dato;
+            }
+        }
+        Debug.LogWarning("No se encontró visual para: " + nombreLogico);
+        return null;
+    }
 
 
 
