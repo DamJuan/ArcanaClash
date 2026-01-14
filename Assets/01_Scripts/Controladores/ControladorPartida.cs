@@ -291,16 +291,6 @@ public class ControladorPartida : MonoBehaviour
             cartaIA.layer = LayerMask.NameToLayer("Default");
 
             DatosCarta datosVisuales = BuscarVisualesPorNombre(carta.Nombre);
-            CartaSpawner spawner = cartaIA.GetComponent<CartaSpawner>();
-
-            if (spawner != null && datosVisuales != null)
-            {
-
-                spawner.Inicializar(datosVisuales);
-
-            
-                spawner.Despertar();
-            }
 
             if (AudioManager.Instancia != null)
             {

@@ -400,6 +400,7 @@ GameObject:
   - component: {fileID: 8803692671151677899}
   - component: {fileID: 2441662485439084116}
   - component: {fileID: -8783845993121863588}
+  - component: {fileID: 3432216261502128290}
   - component: {fileID: -409837523697902797}
   m_Layer: 5
   m_Name: PrefabCarta2D
@@ -545,6 +546,21 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3432216261502128290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5435968868982950622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332595325fdfbfa47ac289331cfae26f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartaEnTablero
+  shaderAliado: {fileID: 2100000, guid: 65ca7168961979f419b0b33c330f28db, type: 2}
+  shaderEnemigo: {fileID: 2100000, guid: bad62e813e120114498f22393d64b600, type: 2}
+  capsulaDefault: {fileID: 6413740055152938484, guid: 7d24a5ce3aef05e49b2eb2a9b73c1819, type: 3}
 --- !u!114 &-409837523697902797
 MonoBehaviour:
   m_ObjectHideFlags: 0

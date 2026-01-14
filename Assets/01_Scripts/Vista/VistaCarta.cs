@@ -266,6 +266,14 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         {
             casilla.RecibirCarta(criatura);
             ControladorPartida.Instancia.JugadorLocal.EliminarCartaDeMano(criatura);
+
+            CartaEnTablero logica3D = GetComponent<CartaEnTablero>();
+            if (logica3D != null)
+            {
+                // Le pasamos los datos: 'criatura' tiene el nombre del modelo, 'true' es aliado
+                logica3D.ConfigurarCarta(criatura, true);
+            }
+
             VistaCriatura scriptMesa = GetComponent<VistaCriatura>();
             if (scriptMesa != null)
             {
