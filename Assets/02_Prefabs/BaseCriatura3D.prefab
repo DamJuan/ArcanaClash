@@ -379,6 +379,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8566947601149007202}
   - component: {fileID: 6332490876621724547}
+  - component: {fileID: 5168811114176183593}
   m_Layer: 0
   m_Name: BaseCriatura3D
   m_TagString: Untagged
@@ -423,6 +424,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5168811114176183593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6413740055152938484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab0c896362b6ea428ac0af5ef36dc30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VistaCriatura
+  GrupoVisual2D: {fileID: 0}
+  GrupoVisual3D: {fileID: 0}
+  TxtVida3D: {fileID: 6955849578109944558}
+  TxtAtaque3D: {fileID: 7191222791774032641}
+  TxtNombre3D: {fileID: 2152560994982272705}
+  TxtVida2D: {fileID: 0}
+  TxtAtaque2D: {fileID: 0}
 --- !u!1 &7993147549393220590
 GameObject:
   m_ObjectHideFlags: 0
