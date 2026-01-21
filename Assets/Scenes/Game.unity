@@ -1652,6 +1652,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 453afcb425465bf4ba809fabde2b1e42, type: 2}
   - {fileID: 11400000, guid: 4f77219b4e0ec5f4d80c735f5679cab4, type: 2}
   - {fileID: 11400000, guid: d0da7f4d35f99b74b96e1150a294c1e9, type: 2}
+  - {fileID: 11400000, guid: b3fc343817f59624699e54e2eeaaa584, type: 2}
   PrefabCasilla: {fileID: 1396850081008200443, guid: b82037636c77e9a40b262630751cee5a, type: 3}
   ContenedorTablero: {fileID: 810601705}
   PrefabCarta: {fileID: 5435968868982950622, guid: 08722bd5c12886d468c6cef78a0ec4c5, type: 3}
