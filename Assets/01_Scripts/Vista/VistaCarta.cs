@@ -58,7 +58,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
         if (modelo is ModeloCriatura criatura)
         {
             if (LifeText != null) LifeText.text = criatura.VidaMaxima.ToString();
-            if (DescriptionText != null) DescriptionText.text = modelo.Nombre + ": " + criatura.Ataque + " ATK";
+            if (DescriptionText != null) DescriptionText.text = "" + criatura.Ataque;
         }
 
         string ruta = "Imagenes/" + modelo.Nombre;

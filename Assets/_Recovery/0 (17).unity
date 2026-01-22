@@ -1664,9 +1664,6 @@ MonoBehaviour:
   SeparacionCartas: 2.2
   lector: {fileID: 84675590}
   materialHologramaIA: {fileID: 2100000, guid: bad62e813e120114498f22393d64b600, type: 2}
-  separacionAncho: 2.5
-  separacionLargo: 2.2
-  huecoCentral: 0.5
 --- !u!4 &810601705
 Transform:
   m_ObjectHideFlags: 0

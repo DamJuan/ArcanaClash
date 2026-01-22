@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,6 +29,11 @@ public class ControladorPartida : MonoBehaviour
     public Material materialHologramaIA;
 
     private bool esTurnoJugador = true;
+
+    [Header("Ajustes de Espaciado")]
+    public float separacionAncho = 2.0f;
+    public float separacionLargo = 2.0f;
+    public float huecoCentral = 0.5f;
 
     void Awake()
     {
@@ -115,44 +120,36 @@ public class ControladorPartida : MonoBehaviour
         }
     }
 
-        void GenerarTableroVisual()
+    void GenerarTableroVisual()
     {
-        // Bucle para recorrer todas las posiciones del tablero
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
             {
-                // Cojo el dato lógico de esta posición
                 ModeloCasilla modelo = tableroLogico.ObtenerCasilla(x, y);
 
-                // Calculo dónde poner el cubo
-                Vector3 posicionLocal = new Vector3(x * 2.0f, 0, y * 2.0f);
+                float posX = x * separacionAncho;
+                float posZ = y * separacionLargo;
 
-                // Instancio el Prefab
+                if (y >= 2)
+                {
+                    posZ += huecoCentral;
+                }
+
+                Vector3 posicionLocal = new Vector3(posX, 0, posZ);
+
                 GameObject nuevaCasilla = Instantiate(PrefabCasilla, ContenedorTablero, false);
-
                 nuevaCasilla.transform.localPosition = posicionLocal;
 
                 nuevaCasilla.name = $"Casilla_{x}_{y}";
 
-                // Conecto la Vista con el Modelo
                 InfoCasilla vistaCasilla = nuevaCasilla.GetComponent<InfoCasilla>();
                 if (vistaCasilla != null)
                 {
-
                     vistaCasilla.CoordenadaX = x;
                     vistaCasilla.CoordenadaY = y;
-
                     vistaCasilla.Configurar(modelo);
-                    // Fila 0 y 1 son del jugador 1 la fila 2 y 3 del jugador 2
-                    if (y < 2)
-                    {
-                        vistaCasilla.EsTerritorioAliado = true;
-                    }
-                    else
-                    {
-                        vistaCasilla.EsTerritorioAliado = false;
-                    }
+                    vistaCasilla.EsTerritorioAliado = (y < 2);
                 }
             }
         }
@@ -184,7 +181,7 @@ public class ControladorPartida : MonoBehaviour
 
         ResolverFaseCombate(jugador1, jugador2, true);
 
-        if (jugador2.Vida <= 0) { Debug.Log("¡HAS GANADO!"); return; }
+        if (jugador2.Vida <= 0) { Debug.Log("Â¡HAS GANADO!"); return; }
 
         esTurnoJugador = false;
 
@@ -241,8 +238,8 @@ public class ControladorPartida : MonoBehaviour
         {
             GameObject cartaIA = Instantiate(PrefabCarta, objCasilla.transform);
 
-            cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
-            cartaIA.transform.localPosition = Vector3.up * 0.5f;
+            cartaIA.transform.localScale = new Vector3(0.014f, 0.014f, 0.014f);
+            cartaIA.transform.localPosition = new Vector3(0, 0.1f, 0);
             cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
 
             VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
@@ -406,7 +403,7 @@ public class ControladorPartida : MonoBehaviour
 
                     if (enemigoEncontrado != null)
                     {
-                        Debug.Log($"y golpea a {enemigoEncontrado.Nombre} por {bicho.Ataque} daño!");
+                        Debug.Log($"y golpea a {enemigoEncontrado.Nombre} por {bicho.Ataque} daÃ±o!");
                         enemigoEncontrado.RecibirDanio(bicho.Ataque);
 
                         GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
@@ -420,7 +417,7 @@ public class ControladorPartida : MonoBehaviour
                     else
                     {
                         // Golpe directo al Jugador
-                        Debug.Log($"y golpea DIRECTO al Rival por {bicho.Ataque} daño!");
+                        Debug.Log($"y golpea DIRECTO al Rival por {bicho.Ataque} daÃ±o!");
                         defensor.RecibirDanio(bicho.Ataque);
                         ActualizarUI();
                     }
@@ -430,21 +427,4 @@ public class ControladorPartida : MonoBehaviour
     }
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
-
-    DatosCarta BuscarVisualesPorNombre(string nombreLogico)
-    {
-        foreach (DatosCarta dato in bibliotecaVisuales)
-        {
-            if (dato.nombreCarta == nombreLogico)
-            {
-                return dato;
-            }
-        }
-        Debug.LogWarning("No se encontró visual para: " + nombreLogico);
-        return null;
-    }
-
-
-
-
 }
