@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1f88767a2ca5d446be71c338f0a8538, type: 3}
-  m_Name: Datos_Ladron
+  m_Name: Datos_Muro
   m_EditorClassIdentifier: Assembly-CSharp::DatosCarta
-  nombreCarta: "Ladr\xF3n"
-  modeloPersonaje: {fileID: 4005715557876075288, guid: 413c9f477ff018e4c9bff6d62783f53d, type: 3}
+  nombreCarta: Muro
+  modeloPersonaje: {fileID: 4005715557876075288, guid: 6b39fec940930974694afff2c14ee898, type: 3}

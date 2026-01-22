@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1f88767a2ca5d446be71c338f0a8538, type: 3}
   m_Name: Datos_Espiritu
   m_EditorClassIdentifier: Assembly-CSharp::DatosCarta
-  nombreCarta: Espiritu
+  nombreCarta: "Esp\xEDritu"
   modeloPersonaje: {fileID: 4005715557876075288, guid: b1440b92c3254a740a4e0c319a03b2da, type: 3}

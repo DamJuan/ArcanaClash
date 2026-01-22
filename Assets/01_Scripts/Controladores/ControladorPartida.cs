@@ -196,24 +196,17 @@ public class ControladorPartida : MonoBehaviour
 
     IEnumerator TurnoIA()
     {
-        yield return new WaitForSeconds(1.0f); // Pausa para que se note el cambio de turno
-
+        yield return new WaitForSeconds(1.0f);
         DespertarCriaturasIA();
-
         jugador2.SubirManaMaximo();
         jugador2.RestaurarMagia();
         jugador2.ReiniciarTurno();
 
-        ModeloCriatura cartaRobada = jugador2.RobarCarta();
-
+        jugador2.RobarCarta();
         ResolverFaseCombate(jugador2, jugador1, false);
-        if (jugador1.Vida <= 0) { Debug.Log(" HAS PERDIDO..."); yield break; }
 
-        yield return new WaitForSeconds(1.0f); // Pausa para simular que piensa
-                     
+        yield return new WaitForSeconds(1.0f);
 
-        // Bucle de jugar cartas
-        // Recorro la mano al revés para poder borrar cartas sin romper el bucle
         for (int i = jugador2.Mano.Count - 1; i >= 0; i--)
         {
             ModeloCriatura cartaCandidata = jugador2.Mano[i];
@@ -225,18 +218,50 @@ public class ControladorPartida : MonoBehaviour
                 if (sitio != null)
                 {
 
+                    sitio.ColocarCriatura(cartaCandidata);
+
                     JugarCartaIA_Visual(cartaCandidata, sitio);
 
                     jugador2.GastarMagia(cartaCandidata.CosteMagia);
                     jugador2.RegistrarJugada();
                     jugador2.EliminarCartaDeMano(cartaCandidata);
 
-                    yield return new WaitForSeconds(1.5f); // Pausa entre cartas para simular el movimiento y que no sea instantáneo
+                    yield return new WaitForSeconds(0.5f);
                 }
             }
         }
-
         ComenzarTurnoJugador();
+    }
+
+    void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
+    {
+        GameObject objCasilla = GameObject.Find($"Casilla_{casillaLogica.CoordenadaX}_{casillaLogica.CoordenadaY}");
+
+        if (objCasilla != null)
+        {
+            GameObject cartaIA = Instantiate(PrefabCarta, objCasilla.transform);
+
+            cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
+            cartaIA.transform.localPosition = Vector3.up * 0.5f;
+            cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+            VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
+            if (vista != null)
+            {
+                vista.Configurar(carta);
+            }
+
+            CartaEnTablero scriptTablero = cartaIA.GetComponent<CartaEnTablero>();
+            if (scriptTablero != null)
+            {
+                scriptTablero.ConfigurarCarta(carta, false);
+            }
+
+            casillaLogica.AsignarCriatura(carta);
+
+            InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
+            if (info != null) info.RecibirCarta(carta);
+        }
     }
 
     void ComenzarTurnoJugador()
@@ -273,71 +298,6 @@ public class ControladorPartida : MonoBehaviour
             }
         }
         return null;
-    }
-
-    void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
-    {
-        GameObject objCasilla = GameObject.Find($"Casilla_{casillaLogica.CoordenadaX}_{casillaLogica.CoordenadaY}");
-
-        if (objCasilla != null)
-        {
-            Transform transformCasilla = objCasilla.transform;
-
-            GameObject cartaIA = Instantiate(PrefabCarta, transformCasilla);
-
-            cartaIA.transform.localPosition = Vector3.up * 0.7f;
-            cartaIA.transform.localRotation = Quaternion.Euler(90, 0, 0);
-            cartaIA.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
-            cartaIA.layer = LayerMask.NameToLayer("Default");
-
-            DatosCarta datosVisuales = BuscarVisualesPorNombre(carta.Nombre);
-
-            if (AudioManager.Instancia != null)
-            {
-                AudioManager.Instancia.ReproducirSonido(AudioManager.Instancia.SonidoJugarCarta);
-            }
-
-            VistaCarta vista = cartaIA.GetComponent<VistaCarta>();
-            if (vista != null)
-            {
-                vista.Configurar(carta);
-                Destroy(vista);
-            }
-
-            VistaCriatura vistaCriatura = cartaIA.GetComponent<VistaCriatura>();
-            if (vistaCriatura != null)
-            {
-                vistaCriatura.enabled = true;
-                vistaCriatura.Inicializar(carta);
-
-                if (materialHologramaIA != null)
-                {
-                    Renderer[] renderers = cartaIA.GetComponentsInChildren<Renderer>(true);
-                    foreach (Renderer r in renderers)
-                    {
-                        if (r is MeshRenderer || r is SkinnedMeshRenderer)
-                        {
-                            r.material = materialHologramaIA;
-                        }
-                    }
-                }
-
-                vistaCriatura.PonerEnReposo(true);
-            }
-
-            Destroy(cartaIA.GetComponent<GraphicRaycaster>());
-            if (cartaIA.GetComponent<CanvasGroup>() != null) Destroy(cartaIA.GetComponent<CanvasGroup>());
-
-            BoxCollider col = cartaIA.GetComponent<BoxCollider>();
-            if (col != null)
-            {
-                col.enabled = true;
-                col.size = new Vector3(col.size.x, col.size.y, 10f);
-            }
-
-            InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
-            if (info != null) info.RecibirCarta(carta);
-        }
     }
 
     void DespertarCriaturasAliadas()
@@ -405,7 +365,6 @@ public class ControladorPartida : MonoBehaviour
 
     void ResolverFaseCombate(ModeloJugador atacante, ModeloJugador defensor, bool esTurnoJugador)
     {
-        // Defino qué filas son de quién
         int filaInicio = esTurnoJugador ? 0 : 2;
         int filaFin = esTurnoJugador ? 2 : 4;
         int direccion = esTurnoJugador ? 1 : -1;
@@ -417,16 +376,13 @@ public class ControladorPartida : MonoBehaviour
             {
                 ModeloCasilla casillaAtacante = tableroLogico.ObtenerCasilla(x, y);
 
-                // Si hay bicho y está despierto
                 if (casillaAtacante.EstaOcupada && casillaAtacante.CriaturaEnCasilla.PuedeAtacar)
                 {
                     ModeloCriatura bicho = casillaAtacante.CriaturaEnCasilla;
 
-                    // Busco objetivo para atacar
                     ModeloCriatura enemigoEncontrado = null;
                     ModeloCasilla casillaEnemiga = null;
 
-                    // Miro las casillas que tiene delante en su misma columna
                     int yObjetivoStart = esTurnoJugador ? 2 : 1;
                     int yObjetivoEnd = esTurnoJugador ? 4 : -1;
 
@@ -448,14 +404,11 @@ public class ControladorPartida : MonoBehaviour
                         }
                     }
 
-                    // --- RESOLVER EL GOLPE ---
                     if (enemigoEncontrado != null)
                     {
-                        // Golpe a criatura
                         Debug.Log($"y golpea a {enemigoEncontrado.Nombre} por {bicho.Ataque} daño!");
                         enemigoEncontrado.RecibirDanio(bicho.Ataque);
 
-                        // Actualizo visuales del enemigo (Vida)
                         GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
                         if (objCasillaEnemiga) objCasillaEnemiga.GetComponentInChildren<VistaCriatura>()?.ActualizarVisuales();
 

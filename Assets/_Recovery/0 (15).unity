@@ -1637,26 +1637,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControladorPartida
   bibliotecaVisuales:
-  - {fileID: 11400000, guid: 46fa1cb481ddba649b543c163c757c99, type: 2}
+  - {fileID: 11400000, guid: 8fce421f099abb2409c81f6070465650, type: 2}
+  - {fileID: 11400000, guid: 640d3006cd1acbc4abace851c7b1079f, type: 2}
   - {fileID: 11400000, guid: a02d4e811088ef040a8c148d5c3770f2, type: 2}
-  - {fileID: 11400000, guid: 39e0f3c1e2dc08246a286550e5cee5db, type: 2}
+  - {fileID: 11400000, guid: 46fa1cb481ddba649b543c163c757c99, type: 2}
   - {fileID: 11400000, guid: 083c87f71c582dc448303b6bd40e767f, type: 2}
-  - {fileID: 11400000, guid: d0da7f4d35f99b74b96e1150a294c1e9, type: 2}
-  - {fileID: 11400000, guid: 786fcc6c5f8e4654c8f5b7bdc05556c9, type: 2}
-  - {fileID: 11400000, guid: 9d8425ad6d60e844a9c8f525e8621a5a, type: 2}
-  - {fileID: 11400000, guid: b3fc343817f59624699e54e2eeaaa584, type: 2}
+  - {fileID: 11400000, guid: 70e7ff08aa9e157448a48f5a6d5af1d1, type: 2}
   - {fileID: 11400000, guid: 8cee0b395cf1c42498aa8ffd63d361cd, type: 2}
+  - {fileID: 11400000, guid: f7b62f6aa2db1b748bc1d1529ae490bc, type: 2}
+  - {fileID: 11400000, guid: 786fcc6c5f8e4654c8f5b7bdc05556c9, type: 2}
+  - {fileID: 11400000, guid: 1e6aa21af8814d94c94c73e753ea9549, type: 2}
+  - {fileID: 11400000, guid: 9d8425ad6d60e844a9c8f525e8621a5a, type: 2}
+  - {fileID: 11400000, guid: 60556ccbfab3b6441885017b801b7c5d, type: 2}
   - {fileID: 11400000, guid: 453afcb425465bf4ba809fabde2b1e42, type: 2}
   - {fileID: 11400000, guid: 4f77219b4e0ec5f4d80c735f5679cab4, type: 2}
-  - {fileID: 11400000, guid: f7b62f6aa2db1b748bc1d1529ae490bc, type: 2}
-  - {fileID: 11400000, guid: 44ffdd4a4730f3147a29f55f588e0218, type: 2}
-  - {fileID: 11400000, guid: 60556ccbfab3b6441885017b801b7c5d, type: 2}
-  - {fileID: 11400000, guid: 1e6aa21af8814d94c94c73e753ea9549, type: 2}
-  - {fileID: 11400000, guid: dabf034de377c684cb44bf89c6521374, type: 2}
-  - {fileID: 11400000, guid: 640d3006cd1acbc4abace851c7b1079f, type: 2}
-  - {fileID: 11400000, guid: da96186ba3d9a9d40b355e312e57130d, type: 2}
-  - {fileID: 11400000, guid: 8fce421f099abb2409c81f6070465650, type: 2}
-  - {fileID: 11400000, guid: 70e7ff08aa9e157448a48f5a6d5af1d1, type: 2}
+  - {fileID: 11400000, guid: d0da7f4d35f99b74b96e1150a294c1e9, type: 2}
+  - {fileID: 11400000, guid: b3fc343817f59624699e54e2eeaaa584, type: 2}
   PrefabCasilla: {fileID: 1396850081008200443, guid: b82037636c77e9a40b262630751cee5a, type: 3}
   ContenedorTablero: {fileID: 810601705}
   PrefabCarta: {fileID: 5435968868982950622, guid: 08722bd5c12886d468c6cef78a0ec4c5, type: 3}

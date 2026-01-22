@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1f88767a2ca5d446be71c338f0a8538, type: 3}
   m_Name: Datos_Bufon
   m_EditorClassIdentifier: Assembly-CSharp::DatosCarta
-  nombreCarta: Bufon
+  nombreCarta: "Buf\xF3n"
   modeloPersonaje: {fileID: 4005715557876075288, guid: d95b8efb5f830a441beb767ef9ad4596, type: 3}

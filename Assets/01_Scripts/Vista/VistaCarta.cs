@@ -264,8 +264,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
         if (miModelo is ModeloCriatura criatura)
         {
-            Debug.Log($"[VISTA CARTA] Jugando carta: {criatura.Nombre}. Modelo3D esperado: '{criatura.NombreModelo3D}'");
-
+            
             casilla.RecibirCarta(criatura);
             ControladorPartida.Instancia.JugadorLocal.EliminarCartaDeMano(criatura);
 
@@ -273,12 +272,7 @@ public class VistaCarta : MonoBehaviour, IDragHandler, IEndDragHandler, IBeginDr
 
             if (logica3D != null)
             {
-                Debug.Log("[VISTA CARTA] Puente encontrado: Enviando datos a CartaEnTablero...");
                 logica3D.ConfigurarCarta(criatura, true);
-            }
-            else
-            {
-                Debug.LogError("[ERROR CRÍTICO] ¡El prefab de la carta NO tiene el script 'CartaEnTablero'!");
             }
 
             VistaCriatura scriptMesa = GetComponent<VistaCriatura>();

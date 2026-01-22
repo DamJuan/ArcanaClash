@@ -42,4 +42,9 @@ public class ModeloCasilla
         this.CriaturaEnCasilla = null;
         this.EstaOcupada = false;
     }
+    public void ColocarCriatura(ModeloCriatura criatura)
+    {
+        this.CriaturaEnCasilla = criatura;
+        this.EstaOcupada = true;
+    }
 }
