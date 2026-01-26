@@ -558,9 +558,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332595325fdfbfa47ac289331cfae26f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CartaEnTablero
+  alturaDeseada: 1
+  anguloGiroEnemigo: 180
+  capsulaDefault: {fileID: 6413740055152938484, guid: 7d24a5ce3aef05e49b2eb2a9b73c1819, type: 3}
   shaderAliado: {fileID: 2100000, guid: 65ca7168961979f419b0b33c330f28db, type: 2}
   shaderEnemigo: {fileID: 2100000, guid: bad62e813e120114498f22393d64b600, type: 2}
-  capsulaDefault: {fileID: 6413740055152938484, guid: 7d24a5ce3aef05e49b2eb2a9b73c1819, type: 3}
 --- !u!114 &-409837523697902797
 MonoBehaviour:
   m_ObjectHideFlags: 0
