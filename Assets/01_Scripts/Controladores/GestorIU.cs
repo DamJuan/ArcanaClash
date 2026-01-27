@@ -105,8 +105,8 @@ public class GestorUI : MonoBehaviour
 
     public void ActualizarVidas(int vidaJugador, int vidaEnemigo)
     {
-        if (TxtVidaJugador != null) TxtVidaJugador.text = "YO: " + vidaJugador;
-        if (TxtVidaEnemigo != null) TxtVidaEnemigo.text = "RIVAL: " + vidaEnemigo;
+        if (TxtVidaJugador != null) TxtVidaJugador.text = "" + vidaJugador;
+        if (TxtVidaEnemigo != null) TxtVidaEnemigo.text = "" + vidaEnemigo;
     }
 
     public void ActualizarMana(int actual, int maximo)
@@ -174,7 +174,6 @@ public class GestorUI : MonoBehaviour
                 }
                 else
                 {
-                    // Si no tocamos NADA (clic al aire), cerramos también.
                     CerrarInspeccion();
                 }
             }

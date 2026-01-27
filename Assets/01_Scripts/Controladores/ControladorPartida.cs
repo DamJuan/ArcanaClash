@@ -193,41 +193,81 @@ public class ControladorPartida : MonoBehaviour
 
     IEnumerator TurnoIA()
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(Random.Range(1.0f, 2.0f));
         DespertarCriaturasIA();
+
         jugador2.SubirManaMaximo();
         jugador2.RestaurarMagia();
         jugador2.ReiniciarTurno();
-
         jugador2.RobarCarta();
+
         ResolverFaseCombate(jugador2, jugador1, false);
+        yield return new WaitForSeconds(0.8f);
 
-        yield return new WaitForSeconds(1.0f);
+        List<ModeloCriatura> cartasEnMano = new List<ModeloCriatura>(jugador2.Mano);
+        cartasEnMano.Sort((a, b) => b.Ataque.CompareTo(a.Ataque));
 
-        for (int i = jugador2.Mano.Count - 1; i >= 0; i--)
+        foreach (ModeloCriatura cartaCandidata in cartasEnMano)
         {
-            ModeloCriatura cartaCandidata = jugador2.Mano[i];
-
             if (jugador2.MagiaActual >= cartaCandidata.CosteMagia && jugador2.PuedeJugarCarta())
             {
-                ModeloCasilla sitio = EncontrarCasillaVaciaIA();
+                ModeloCasilla sitio = EvaluarMejorSitioIA();
 
                 if (sitio != null)
                 {
-
                     sitio.ColocarCriatura(cartaCandidata);
-
                     JugarCartaIA_Visual(cartaCandidata, sitio);
 
                     jugador2.GastarMagia(cartaCandidata.CosteMagia);
                     jugador2.RegistrarJugada();
                     jugador2.EliminarCartaDeMano(cartaCandidata);
 
-                    yield return new WaitForSeconds(0.5f);
+                    yield return new WaitForSeconds(Random.Range(0.6f, 1.2f));
                 }
             }
         }
+
         ComenzarTurnoJugador();
+    }
+    ModeloCasilla EvaluarMejorSitioIA()
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            bool columnaAmenazada = tableroLogico.ObtenerCasilla(x, 0).EstaOcupada || tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
+
+            if (columnaAmenazada)
+            {
+                ModeloCasilla casillaDefensa = tableroLogico.ObtenerCasilla(x, 2);
+                if (!casillaDefensa.EstaOcupada) return casillaDefensa;
+
+                ModeloCasilla casillaAtras = tableroLogico.ObtenerCasilla(x, 3);
+                if (!casillaAtras.EstaOcupada) return casillaAtras;
+            }
+        }
+
+        for (int x = 0; x < 4; x++)
+        {
+            bool columnaLibre = !tableroLogico.ObtenerCasilla(x, 0).EstaOcupada && !tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
+            if (columnaLibre)
+            {
+                ModeloCasilla casillaAtaque = tableroLogico.ObtenerCasilla(x, 2);
+                if (!casillaAtaque.EstaOcupada) return casillaAtaque;
+            }
+        }
+
+        List<ModeloCasilla> vacias = new List<ModeloCasilla>();
+        for (int y = 2; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                ModeloCasilla c = tableroLogico.ObtenerCasilla(x, y);
+                if (!c.EstaOcupada) vacias.Add(c);
+            }
+        }
+
+        if (vacias.Count > 0) return vacias[Random.Range(0, vacias.Count)];
+
+        return null;
     }
 
     void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
@@ -276,27 +316,6 @@ public class ControladorPartida : MonoBehaviour
         esTurnoJugador = true;
         if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(true);
     }
-
-
-
-    // ESTE METODO HACE QUE LA IA JUEGUE UNA CARTA EN UNA CASILLA VACIA DE SU ZONA
-    ModeloCasilla EncontrarCasillaVaciaIA()
-    {
-       
-        for (int y = 2; y < 4; y++)
-        {
-            for (int x = 0; x < 4; x++)
-            {
-                ModeloCasilla posibleCasilla = tableroLogico.ObtenerCasilla(x, y);
-                if (!posibleCasilla.EstaOcupada)
-                {
-                    return posibleCasilla;
-                }
-            }
-        }
-        return null;
-    }
-
     void DespertarCriaturasAliadas()
     {
         foreach (Transform hijoCasilla in ContenedorTablero)

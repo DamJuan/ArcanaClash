@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
@@ -8,7 +8,7 @@ public class VistaCriatura : MonoBehaviour
     public GameObject GrupoVisual2D;
     public GameObject GrupoVisual3D;
 
-    [Header("TEXTOS 3D (Se buscan solos si est·n vacÌos)")]
+    [Header("TEXTOS 3D (Se buscan solos si est√°n vac√≠os)")]
     public TMP_Text TxtVida3D;
     public TMP_Text TxtAtaque3D;
     public TMP_Text TxtNombre3D;
@@ -19,14 +19,14 @@ public class VistaCriatura : MonoBehaviour
 
     private ModeloCriatura miModelo;
 
-    // --- ESTO ES LO NUEVO: BUSCADOR AUTOM¡TICO ---
+    // --- ESTO ES LO NUEVO: BUSCADOR AUTOM√ÅTICO ---
     void Awake()
     {
-        // Si las casillas est·n vacÌas, el script busca objetos hijos que se llamen asÌ
+        // Si las casillas est√°n vac√≠as, el script busca objetos hijos que se llamen as√≠
         if (TxtNombre3D == null) TxtNombre3D = BuscarTextoEnHijos("Nombre");
         if (TxtVida3D == null) TxtVida3D = BuscarTextoEnHijos("Vida");
 
-        // He puesto "Araque" tambiÈn porque vi en tu foto que se llamaba asÌ
+        // He puesto "Araque" tambi√©n porque vi en tu foto que se llamaba as√≠
         if (TxtAtaque3D == null)
         {
             TxtAtaque3D = BuscarTextoEnHijos("Ataque");
@@ -34,7 +34,7 @@ public class VistaCriatura : MonoBehaviour
         }
     }
 
-    // FunciÛn auxiliar para buscar recursivamente
+    // Funci√≥n auxiliar para buscar recursivamente
     TMP_Text BuscarTextoEnHijos(string nombreObjeto)
     {
         // Busca en todos los hijos y nietos
@@ -65,8 +65,15 @@ public class VistaCriatura : MonoBehaviour
         if (TxtAtaque2D != null) TxtAtaque2D.text = miModelo.Ataque.ToString();
 
         // TEXTOS 3D
-        if (TxtVida3D != null) TxtVida3D.text = miModelo.VidaActual.ToString();
-        if (TxtAtaque3D != null) TxtAtaque3D.text = miModelo.Ataque.ToString();
+        if (TxtVida3D != null)
+        {
+            TxtVida3D.text = "<sprite name=\"simbolico\"> " + miModelo.VidaActual.ToString();
+        }
+        if (TxtAtaque3D != null)
+        {
+            TxtAtaque3D.text = "<sprite name=\"espada\"> " + miModelo.Ataque.ToString();
+        }
+
         if (TxtNombre3D != null) TxtNombre3D.text = miModelo.Nombre;
 
         // Debug para confirmar que escribe
@@ -87,7 +94,7 @@ public class VistaCriatura : MonoBehaviour
             if (GrupoVisual3D != null) GrupoVisual3D.SetActive(true);
             transform.localRotation = Quaternion.Euler(0, 0, 0);
 
-            // Forzamos actualizaciÛn al despertar
+            // Forzamos actualizaci√≥n al despertar
             ActualizarVisuales();
         }
     }
