@@ -83,7 +83,7 @@ MonoBehaviour:
   - m_ElementType: 2
     m_Unicode: 65534
     m_GlyphIndex: 0
-    m_Scale: 4
+    m_Scale: 2.5
     m_Name: espada
   m_GlyphTable:
   - m_Index: 0
@@ -91,7 +91,7 @@ MonoBehaviour:
       m_Width: 512
       m_Height: 512
       m_HorizontalBearingX: -256
-      m_HorizontalBearingY: 256
+      m_HorizontalBearingY: 200
       m_HorizontalAdvance: 512
     m_GlyphRect:
       m_X: 0

@@ -67,11 +67,11 @@ public class VistaCriatura : MonoBehaviour
         // TEXTOS 3D
         if (TxtVida3D != null)
         {
-            TxtVida3D.text = "<sprite name=\"simbolico\"> " + miModelo.VidaActual.ToString();
+            TxtVida3D.text = "❤️" + miModelo.VidaActual.ToString();
         }
         if (TxtAtaque3D != null)
         {
-            TxtAtaque3D.text = "<sprite name=\"espada\"> " + miModelo.Ataque.ToString();
+            TxtAtaque3D.text = "⚔️" + miModelo.Ataque.ToString();
         }
 
         if (TxtNombre3D != null) TxtNombre3D.text = miModelo.Nombre;
