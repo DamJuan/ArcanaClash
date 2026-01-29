@@ -18,26 +18,23 @@ public class VistaCriatura : MonoBehaviour
     public TMP_Text TxtAtaque2D;
 
     private ModeloCriatura miModelo;
+    private Animator miAnimator;
 
-    // --- ESTO ES LO NUEVO: BUSCADOR AUTOMÁTICO ---
     void Awake()
     {
-        // Si las casillas están vacías, el script busca objetos hijos que se llamen así
         if (TxtNombre3D == null) TxtNombre3D = BuscarTextoEnHijos("Nombre");
         if (TxtVida3D == null) TxtVida3D = BuscarTextoEnHijos("Vida");
 
-        // He puesto "Araque" también porque vi en tu foto que se llamaba así
         if (TxtAtaque3D == null)
         {
             TxtAtaque3D = BuscarTextoEnHijos("Ataque");
-            if (TxtAtaque3D == null) TxtAtaque3D = BuscarTextoEnHijos("Araque"); // Por si acaso
+            if (TxtAtaque3D == null) TxtAtaque3D = BuscarTextoEnHijos("Araque");
         }
+        miAnimator = GetComponent<Animator>();
     }
 
-    // Función auxiliar para buscar recursivamente
     TMP_Text BuscarTextoEnHijos(string nombreObjeto)
     {
-        // Busca en todos los hijos y nietos
         TMP_Text[] todosLosTextos = GetComponentsInChildren<TMP_Text>(true);
         foreach (TMP_Text t in todosLosTextos)
         {
@@ -45,14 +42,13 @@ public class VistaCriatura : MonoBehaviour
         }
         return null;
     }
-    // ---------------------------------------------
+
 
     public void Inicializar(ModeloCriatura modelo)
     {
         this.miModelo = modelo;
         ActualizarVisuales();
 
-        // Empieza dormida (2D) hasta que CartaEnTablero la despierte
         PonerEnReposo(true);
     }
 
@@ -76,8 +72,6 @@ public class VistaCriatura : MonoBehaviour
 
         if (TxtNombre3D != null) TxtNombre3D.text = miModelo.Nombre;
 
-        // Debug para confirmar que escribe
-        // Debug.Log($"Escribiendo en 3D -> Vida: {miModelo.VidaActual}, Nombre: {miModelo.Nombre}");
     }
 
     public void PonerEnReposo(bool dormir)
@@ -94,7 +88,6 @@ public class VistaCriatura : MonoBehaviour
             if (GrupoVisual3D != null) GrupoVisual3D.SetActive(true);
             transform.localRotation = Quaternion.Euler(0, 0, 0);
 
-            // Forzamos actualización al despertar
             ActualizarVisuales();
         }
     }
@@ -102,5 +95,17 @@ public class VistaCriatura : MonoBehaviour
     public void Despertar()
     {
         PonerEnReposo(false);
+        ActualizarVisuales();
+
+        if (miAnimator != null)
+        {
+            miAnimator.enabled = true;
+
+            miAnimator.applyRootMotion = false;
+
+            miAnimator.Play("Breathing Idle", 0, 0f);
+
+            Debug.Log("Animación iniciada: Breathing Idle");
+        }
     }
 }
