@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 
 //Esto lo que hace es crear la partida, la logica del tablero y pinta casillas
 public class ControladorPartida : MonoBehaviour
-{
+    {
+
+    public GameObject panelVictoria;
+    public GameObject panelDerrota;
+
+    public static ControladorPartida Instancia;
 
     public List<DatosCarta> bibliotecaVisuales;
 
@@ -24,7 +30,6 @@ public class ControladorPartida : MonoBehaviour
     private ModeloJugador jugador1;
     private ModeloJugador jugador2;
     public LectorCSV lector;
-    public static ControladorPartida Instancia;
 
     public Material materialHologramaIA;
 
@@ -67,6 +72,38 @@ public class ControladorPartida : MonoBehaviour
 
             GestorUI.Instancia.ActualizarVidas(jugador1.Vida, jugador2.Vida);
         }
+
+        ComprobarEstadoPartida();
+    }
+
+    void ComprobarEstadoPartida()
+    {
+        if (jugador2.Vida <= 0)
+        {
+            MostrarVictoria();
+        }
+        else if (jugador1.Vida <= 0)
+        {
+            MostrarDerrota();
+        }
+    }
+
+    public void MostrarVictoria()
+    {
+        panelVictoria.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void MostrarDerrota()
+    {
+        panelDerrota.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void VolverAJugar()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     IEnumerator IniciarPartida()
@@ -181,14 +218,12 @@ public class ControladorPartida : MonoBehaviour
 
         ResolverFaseCombate(jugador1, jugador2, true);
 
-        if (jugador2.Vida <= 0) { Debug.Log("¡HAS GANADO!"); return; }
+        if (jugador2.Vida <= 0) return;
 
         esTurnoJugador = false;
 
-        // Desactivo el boton de pasar turno hasta que sea el turno del jugador de nuevo
         if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(false);
         StartCoroutine(TurnoIA());
-
     }
 
     IEnumerator TurnoIA()
@@ -422,7 +457,6 @@ public class ControladorPartida : MonoBehaviour
 
                     if (enemigoEncontrado != null)
                     {
-                        Debug.Log($"y golpea a {enemigoEncontrado.Nombre} por {bicho.Ataque} daño!");
                         enemigoEncontrado.RecibirDanio(bicho.Ataque);
 
                         GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
@@ -435,8 +469,6 @@ public class ControladorPartida : MonoBehaviour
                     }
                     else
                     {
-                        // Golpe directo al Jugador
-                        Debug.Log($"y golpea DIRECTO al Rival por {bicho.Ataque} daño!");
                         defensor.RecibirDanio(bicho.Ataque);
                         ActualizarUI();
                     }

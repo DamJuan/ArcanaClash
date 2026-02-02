@@ -105,7 +105,6 @@ public class VistaCriatura : MonoBehaviour
 
             miAnimator.Play("Breathing Idle", 0, 0f);
 
-            Debug.Log("Animación iniciada: Breathing Idle");
         }
     }
 }
