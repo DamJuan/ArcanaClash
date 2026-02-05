@@ -24,6 +24,8 @@ public class ControladorJuego : MonoBehaviour
 
         if (togglePantalla != null)
             togglePantalla.isOn = esPantallaCompleta;
+
+        if (panelPausa != null) panelPausa.SetActive(false);
     }
 
     void Update()
@@ -34,16 +36,22 @@ public class ControladorJuego : MonoBehaviour
         }
     }
 
+    public void AlternarPausa()
+    {
+        if (estaPausado) Reanudar();
+        else Pausar();
+    }
+
     public void Pausar()
     {
-        panelPausa.SetActive(true);
+        if (panelPausa != null) panelPausa.SetActive(true);
         Time.timeScale = 0f;
         estaPausado = true;
     }
 
     public void Reanudar()
     {
-        panelPausa.SetActive(false);
+        if (panelPausa != null) panelPausa.SetActive(false);
         Time.timeScale = 1f;
         estaPausado = false;
     }
@@ -52,6 +60,11 @@ public class ControladorJuego : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MenuPrincipal");
+    }
+
+    public void SalirDelJuego()
+    {
+        Application.Quit();
     }
 
     public void CambiarVolumen(float valor)
@@ -64,17 +77,5 @@ public class ControladorJuego : MonoBehaviour
     {
         Screen.fullScreen = esCompleta;
         PlayerPrefs.SetInt("pantallaCompleta", esCompleta ? 1 : 0);
-    }
-
-    public void AlternarPausa()
-    {
-        if (estaPausado)
-        {
-            Reanudar();
-        }
-        else
-        {
-            Pausar();
-        }
     }
 }
