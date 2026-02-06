@@ -692,6 +692,8 @@ MonoBehaviour:
   TxtVida3D: {fileID: 0}
   TxtAtaque3D: {fileID: 0}
   TxtNombre3D: {fileID: 0}
+  PrefabTextoDano: {fileID: 7946733844115955880, guid: 48d3bd86938006e40bcbbe3a72c1cf82, type: 3}
+  PrefabEfectoMuerte: {fileID: 5510200079218928281, guid: 2e2358f63e7566e479870980b10c0e77, type: 3}
   TxtVida2D: {fileID: 0}
   TxtAtaque2D: {fileID: 0}
 --- !u!95 &5918694410047042928

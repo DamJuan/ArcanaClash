@@ -399,16 +399,15 @@ public class ControladorPartida : MonoBehaviour
 
     public void MatarCriatura(ModeloCriatura criatura, ModeloCasilla casilla)
     {
-
         casilla.LimpiarCasilla();
-
         GameObject objCasilla = GameObject.Find($"Casilla_{casilla.CoordenadaX}_{casilla.CoordenadaY}");
+
         if (objCasilla != null)
         {
-
             VistaCriatura vista = objCasilla.GetComponentInChildren<VistaCriatura>();
             if (vista != null)
             {
+                vista.AnimacionMuerte();
                 Destroy(vista.gameObject);
             }
         }
@@ -418,9 +417,7 @@ public class ControladorPartida : MonoBehaviour
     {
         int filaInicio = esTurnoJugador ? 0 : 2;
         int filaFin = esTurnoJugador ? 2 : 4;
-        int direccion = esTurnoJugador ? 1 : -1;
 
- 
         for (int x = 0; x < 4; x++)
         {
             for (int y = filaInicio; y < filaFin; y++)
@@ -433,10 +430,6 @@ public class ControladorPartida : MonoBehaviour
 
                     ModeloCriatura enemigoEncontrado = null;
                     ModeloCasilla casillaEnemiga = null;
-
-                    int yObjetivoStart = esTurnoJugador ? 2 : 1;
-                    int yObjetivoEnd = esTurnoJugador ? 4 : -1;
-
 
                     if (esTurnoJugador)
                     {
@@ -460,7 +453,15 @@ public class ControladorPartida : MonoBehaviour
                         enemigoEncontrado.RecibirDanio(bicho.Ataque);
 
                         GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
-                        if (objCasillaEnemiga) objCasillaEnemiga.GetComponentInChildren<VistaCriatura>()?.ActualizarVisuales();
+                        if (objCasillaEnemiga)
+                        {
+                            VistaCriatura vistaEnemiga = objCasillaEnemiga.GetComponentInChildren<VistaCriatura>();
+                            if (vistaEnemiga != null)
+                            {
+                                vistaEnemiga.ActualizarVisuales();
+                                vistaEnemiga.AnimacionRecibirDano(bicho.Ataque);
+                            }
+                        }
 
                         if (enemigoEncontrado.VidaActual <= 0)
                         {
@@ -476,6 +477,7 @@ public class ControladorPartida : MonoBehaviour
             }
         }
     }
+
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
 }

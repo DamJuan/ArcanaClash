@@ -13,6 +13,9 @@ public class VistaCriatura : MonoBehaviour
     public TMP_Text TxtAtaque3D;
     public TMP_Text TxtNombre3D;
 
+    public GameObject PrefabTextoDano;
+    public GameObject PrefabEfectoMuerte;
+
     [Header("TEXTOS 2D")]
     public TMP_Text TxtVida2D;
     public TMP_Text TxtAtaque2D;
@@ -107,4 +110,27 @@ public class VistaCriatura : MonoBehaviour
 
         }
     }
+
+
+    public void AnimacionRecibirDano(int cantidad)
+    {
+        if (PrefabTextoDano != null)
+        {
+            Vector3 posicion = transform.position + Vector3.up * 1.5f;
+            GameObject textoObj = Instantiate(PrefabTextoDano, posicion, Quaternion.identity);
+
+            TextoFlotante scriptTexto = textoObj.GetComponent<TextoFlotante>();
+            if (scriptTexto != null) scriptTexto.Configurar(cantidad);
+        }
+
+    }
+
+    public void AnimacionMuerte()
+    {
+        if (PrefabEfectoMuerte != null)
+        {
+            Instantiate(PrefabEfectoMuerte, transform.position, Quaternion.identity);
+        }
+    }
+
 }
