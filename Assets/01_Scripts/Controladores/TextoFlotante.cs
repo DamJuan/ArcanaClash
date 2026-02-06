@@ -42,7 +42,7 @@ public class TextoFlotante : MonoBehaviour
 
         if (Camera.main != null)
         {
-            transform.rotation = Quaternion.LookRotation(Camera.main.transform.position - transform.position);
+            transform.rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
         }
     }
 }
