@@ -216,9 +216,15 @@ public class ControladorPartida : MonoBehaviour
     {
         if (!esTurnoJugador) return;
 
-        ResolverFaseCombate(jugador1, jugador2, true);
+        StartCoroutine(SecuenciaTurnoJugador());
+    }
 
-        if (jugador2.Vida <= 0) return;
+    IEnumerator SecuenciaTurnoJugador()
+    {
+
+        yield return StartCoroutine(ResolverFaseCombate(jugador1, jugador2, true));
+
+        if (jugador2.Vida <= 0) yield break;
 
         esTurnoJugador = false;
 
@@ -236,7 +242,7 @@ public class ControladorPartida : MonoBehaviour
         jugador2.ReiniciarTurno();
         jugador2.RobarCarta();
 
-        ResolverFaseCombate(jugador2, jugador1, false);
+        yield return StartCoroutine(ResolverFaseCombate(jugador2, jugador1, false));
         yield return new WaitForSeconds(0.8f);
 
         List<ModeloCriatura> cartasEnMano = new List<ModeloCriatura>(jugador2.Mano);
@@ -413,7 +419,7 @@ public class ControladorPartida : MonoBehaviour
         }
     }
 
-    void ResolverFaseCombate(ModeloJugador atacante, ModeloJugador defensor, bool esTurnoJugador)
+    IEnumerator ResolverFaseCombate(ModeloJugador atacante, ModeloJugador defensor, bool esTurnoJugador)
     {
         int filaInicio = esTurnoJugador ? 0 : 2;
         int filaFin = esTurnoJugador ? 2 : 4;
@@ -424,10 +430,15 @@ public class ControladorPartida : MonoBehaviour
             {
                 ModeloCasilla casillaAtacante = tableroLogico.ObtenerCasilla(x, y);
 
+                if (casillaAtacante.EstaOcupada && casillaAtacante.CriaturaEnCasilla.VidaActual <= 0)
+                {
+                    MatarCriatura(casillaAtacante.CriaturaEnCasilla, casillaAtacante);
+                    continue;
+                }
+
                 if (casillaAtacante.EstaOcupada && casillaAtacante.CriaturaEnCasilla.PuedeAtacar)
                 {
                     ModeloCriatura bicho = casillaAtacante.CriaturaEnCasilla;
-
                     ModeloCriatura enemigoEncontrado = null;
                     ModeloCasilla casillaEnemiga = null;
 
@@ -467,11 +478,15 @@ public class ControladorPartida : MonoBehaviour
                         {
                             MatarCriatura(enemigoEncontrado, casillaEnemiga);
                         }
+
+                        yield return new WaitForSeconds(0.4f);
                     }
                     else
                     {
                         defensor.RecibirDanio(bicho.Ataque);
                         ActualizarUI();
+
+                        yield return new WaitForSeconds(0.4f);
                     }
                 }
             }
