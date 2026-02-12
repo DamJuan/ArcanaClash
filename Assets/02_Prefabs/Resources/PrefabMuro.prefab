@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 4449297175809067635}
   - component: {fileID: 2381809982640196405}
   m_Layer: 0
-  m_Name: Araque
+  m_Name: Ataque
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -613,15 +613,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aab0c896362b6ea428ac0af5ef36dc30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VistaCriatura
-  GrupoVisual2D: {fileID: 0}
-  GrupoVisual3D: {fileID: 0}
-  TxtVida3D: {fileID: 0}
-  TxtAtaque3D: {fileID: 0}
-  TxtNombre3D: {fileID: 0}
-  PrefabTextoDano: {fileID: 7946733844115955880, guid: 48d3bd86938006e40bcbbe3a72c1cf82, type: 3}
-  PrefabEfectoMuerte: {fileID: 5510200079218928281, guid: 2e2358f63e7566e479870980b10c0e77, type: 3}
-  TxtVida2D: {fileID: 0}
-  TxtAtaque2D: {fileID: 0}
+  textoNombre: {fileID: 3011383653144775053}
+  textoVida: {fileID: 2680792768685462250}
+  textoAtaque: {fileID: 2381809982640196405}
+  indicadorEscudo: {fileID: 0}
+  modelo3D: {fileID: 0}
+  materialNormal: {fileID: 0}
+  materialDormido: {fileID: 0}
+  materialHerido: {fileID: 0}
+  particulasAtaque: {fileID: 0}
+  particulasMuerte: {fileID: 6391943726875570137, guid: 2e2358f63e7566e479870980b10c0e77, type: 3}
+  particulasCuracion: {fileID: 6391943726875570137, guid: 6c4bedbe187e18c4e93e69ad58c72d1b, type: 3}
 --- !u!95 &-7367077128999189184
 Animator:
   serializedVersion: 7

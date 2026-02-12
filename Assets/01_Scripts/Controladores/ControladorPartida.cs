@@ -4,11 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-
-//Esto lo que hace es crear la partida, la logica del tablero y pinta casillas
 public class ControladorPartida : MonoBehaviour
-    {
-
+{
     public GameObject panelVictoria;
     public GameObject panelDerrota;
 
@@ -17,14 +14,12 @@ public class ControladorPartida : MonoBehaviour
     public List<DatosCarta> bibliotecaVisuales;
 
     public GameObject PrefabCasilla;
-
-    // Esto lo hago para tener orden en las casillas
     public Transform ContenedorTablero;
 
     public GameObject PrefabCarta;
     public Transform ContenedorManoJugador;
 
-    public float SeparacionCartas = 2f; 
+    public float SeparacionCartas = 2f;
 
     private ModeloTablero tableroLogico;
     private ModeloJugador jugador1;
@@ -40,11 +35,22 @@ public class ControladorPartida : MonoBehaviour
     public float separacionLargo = 2.0f;
     public float huecoCentral = 0.5f;
 
+    [Header("Prefabs de Efectos")]
+    public GameObject prefabTextoDanio;
+    public GameObject prefabTextoCuracion;
+
+    private Dictionary<Vector2Int, InfoCasilla> cacheCasillas;
+    private Dictionary<ModeloCriatura, Vector2Int> cacheCriaturas;
+
     void Awake()
     {
         if (Instancia == null) Instancia = this;
         else Destroy(gameObject);
+
+        cacheCasillas = new Dictionary<Vector2Int, InfoCasilla>();
+        cacheCriaturas = new Dictionary<ModeloCriatura, Vector2Int>();
     }
+
     public ModeloJugador JugadorLocal { get { return jugador1; } }
 
     void Start()
@@ -67,9 +73,7 @@ public class ControladorPartida : MonoBehaviour
     {
         if (GestorUI.Instancia != null)
         {
-            // Con esto le mando los datos del modeloJugador a la pantalla
             GestorUI.Instancia.ActualizarMana(jugador1.MagiaActual, jugador1.MagiaMaxima);
-
             GestorUI.Instancia.ActualizarVidas(jugador1.Vida, jugador2.Vida);
         }
 
@@ -108,7 +112,6 @@ public class ControladorPartida : MonoBehaviour
 
     IEnumerator IniciarPartida()
     {
-
         if (lector != null)
         {
             List<ModeloCriatura> todasLasCartas = lector.CargarCartas();
@@ -116,18 +119,19 @@ public class ControladorPartida : MonoBehaviour
             jugador1.CargarMazo(todasLasCartas);
             jugador1.Barajar();
 
-            jugador2.CargarMazo(todasLasCartas); 
+            jugador2.CargarMazo(todasLasCartas);
             jugador2.Barajar();
 
             for (int k = 0; k < 5; k++)
             {
-                jugador2.RobarCarta();
+                ModeloCriatura cartaIA = jugador2.RobarCarta();
+                if (cartaIA != null) cartaIA.EsDelJugador = false;
             }
 
             for (int i = 0; i < 5; i++)
             {
                 RobarCartaJugador();
-                yield return new WaitForSeconds(0.2f); // Con esto consigo un efecto visual de robo de cartas
+                yield return new WaitForSeconds(0.2f);
             }
         }
     }
@@ -138,6 +142,7 @@ public class ControladorPartida : MonoBehaviour
 
         if (cartaRobada != null)
         {
+            cartaRobada.EsDelJugador = true;
             CrearCartaVisual(cartaRobada);
         }
     }
@@ -153,7 +158,7 @@ public class ControladorPartida : MonoBehaviour
             {
                 vista.Configurar(cartaModelo);
             }
-            OrganizarMano(); 
+            OrganizarMano();
         }
     }
 
@@ -177,7 +182,6 @@ public class ControladorPartida : MonoBehaviour
 
                 GameObject nuevaCasilla = Instantiate(PrefabCasilla, ContenedorTablero, false);
                 nuevaCasilla.transform.localPosition = posicionLocal;
-
                 nuevaCasilla.name = $"Casilla_{x}_{y}";
 
                 InfoCasilla vistaCasilla = nuevaCasilla.GetComponent<InfoCasilla>();
@@ -187,6 +191,8 @@ public class ControladorPartida : MonoBehaviour
                     vistaCasilla.CoordenadaY = y;
                     vistaCasilla.Configurar(modelo);
                     vistaCasilla.EsTerritorioAliado = (y < 2);
+
+                    cacheCasillas[new Vector2Int(x, y)] = vistaCasilla;
                 }
             }
         }
@@ -200,14 +206,12 @@ public class ControladorPartida : MonoBehaviour
         {
             Transform carta = ContenedorManoJugador.GetChild(i);
 
-            // Calculo el centro de la mano
             float centro = (cantidad - 1) / 2f;
             float diferencia = i - centro;
 
             float posX = diferencia * SeparacionCartas;
 
             carta.localPosition = new Vector3(posX, 0, 0);
-
             carta.localRotation = Quaternion.identity;
         }
     }
@@ -221,6 +225,7 @@ public class ControladorPartida : MonoBehaviour
 
     IEnumerator SecuenciaTurnoJugador()
     {
+        EjecutarHabilidadesEnTurno(HabilidadCarta.MomentoEjecucion.InicioTurno, true);
 
         yield return StartCoroutine(ResolverFaseCombate(jugador1, jugador2, true));
 
@@ -240,19 +245,37 @@ public class ControladorPartida : MonoBehaviour
         jugador2.SubirManaMaximo();
         jugador2.RestaurarMagia();
         jugador2.ReiniciarTurno();
-        jugador2.RobarCarta();
+
+        ModeloCriatura cartaRobada = jugador2.RobarCarta();
+        if (cartaRobada != null) cartaRobada.EsDelJugador = false;
+
+        EjecutarHabilidadesEnTurno(HabilidadCarta.MomentoEjecucion.InicioTurno, false);
 
         yield return StartCoroutine(ResolverFaseCombate(jugador2, jugador1, false));
         yield return new WaitForSeconds(0.8f);
 
+        yield return StartCoroutine(TurnoIAMejorado());
+
+        ComenzarTurnoJugador();
+    }
+
+    IEnumerator TurnoIAMejorado()
+    {
         List<ModeloCriatura> cartasEnMano = new List<ModeloCriatura>(jugador2.Mano);
-        cartasEnMano.Sort((a, b) => b.Ataque.CompareTo(a.Ataque));
+
+        Dictionary<int, int> amenazasPorColumna = EvaluarAmenazas(false);
+
+        cartasEnMano.Sort((a, b) => {
+            int prioridadA = CalcularPrioridadCarta(a, amenazasPorColumna);
+            int prioridadB = CalcularPrioridadCarta(b, amenazasPorColumna);
+            return prioridadB.CompareTo(prioridadA);
+        });
 
         foreach (ModeloCriatura cartaCandidata in cartasEnMano)
         {
             if (jugador2.MagiaActual >= cartaCandidata.CosteMagia && jugador2.PuedeJugarCarta())
             {
-                ModeloCasilla sitio = EvaluarMejorSitioIA();
+                ModeloCasilla sitio = EvaluarMejorSitioIAMejorada(cartaCandidata, amenazasPorColumna);
 
                 if (sitio != null)
                 {
@@ -263,18 +286,171 @@ public class ControladorPartida : MonoBehaviour
                     jugador2.RegistrarJugada();
                     jugador2.EliminarCartaDeMano(cartaCandidata);
 
+                    cacheCriaturas[cartaCandidata] = new Vector2Int(sitio.CoordenadaX, sitio.CoordenadaY);
+
+                    cartaCandidata.EjecutarHabilidades(HabilidadCarta.MomentoEjecucion.AlJugar, this);
+
                     yield return new WaitForSeconds(Random.Range(0.6f, 1.2f));
                 }
             }
         }
-
-        ComenzarTurnoJugador();
     }
+
+    private Dictionary<int, int> EvaluarAmenazas(bool paraJugador)
+    {
+        Dictionary<int, int> amenazas = new Dictionary<int, int>();
+
+        int filaInicio = paraJugador ? 2 : 0;
+        int filaFin = paraJugador ? 4 : 2;
+
+        for (int x = 0; x < 4; x++)
+        {
+            int amenazaTotal = 0;
+            for (int y = filaInicio; y < filaFin; y++)
+            {
+                ModeloCasilla casilla = tableroLogico.ObtenerCasilla(x, y);
+                if (casilla.EstaOcupada)
+                {
+                    ModeloCriatura criatura = casilla.CriaturaEnCasilla;
+                    amenazaTotal += criatura.Ataque * criatura.VidaActual;
+                }
+            }
+            amenazas[x] = amenazaTotal;
+        }
+
+        return amenazas;
+    }
+
+    private int CalcularPrioridadCarta(ModeloCriatura carta, Dictionary<int, int> amenazas)
+    {
+        int prioridad = 0;
+
+        int amenazaTotal = 0;
+        foreach (int valor in amenazas.Values)
+        {
+            amenazaTotal += valor;
+        }
+
+        if (amenazaTotal > 4)
+        {
+            prioridad += carta.VidaMaxima * 2;
+        }
+        else
+        {
+            prioridad += carta.Ataque * 3;
+        }
+
+        if (jugador2.MagiaMaxima <= 4)
+        {
+            prioridad += (5 - carta.CosteMagia) * 5;
+        }
+
+        return prioridad;
+    }
+
+    ModeloCasilla EvaluarMejorSitioIAMejorada(ModeloCriatura carta, Dictionary<int, int> amenazas)
+    {
+        List<CasillaPuntuada> casillasConPuntuacion = new List<CasillaPuntuada>();
+
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = 2; y < 4; y++)
+            {
+                ModeloCasilla casilla = tableroLogico.ObtenerCasilla(x, y);
+                if (!casilla.EstaOcupada)
+                {
+                    int puntuacion = EvaluarPosicion(casilla, carta, amenazas);
+                    casillasConPuntuacion.Add(new CasillaPuntuada(casilla, puntuacion));
+                }
+            }
+        }
+
+        if (casillasConPuntuacion.Count == 0) return null;
+
+        casillasConPuntuacion.Sort((a, b) => b.puntuacion.CompareTo(a.puntuacion));
+        return casillasConPuntuacion[0].casilla;
+    }
+
+    private class CasillaPuntuada
+    {
+        public ModeloCasilla casilla;
+        public int puntuacion;
+
+        public CasillaPuntuada(ModeloCasilla c, int p)
+        {
+            casilla = c;
+            puntuacion = p;
+        }
+    }
+
+    private int EvaluarPosicion(ModeloCasilla casilla, ModeloCriatura carta, Dictionary<int, int> amenazas)
+    {
+        int puntuacion = 0;
+        int x = casilla.CoordenadaX;
+        int y = casilla.CoordenadaY;
+
+        if (carta.VidaMaxima >= 6 || carta.Nombre == "Muro" || carta.Nombre == "Guardia")
+        {
+            if (y == 2) puntuacion += 30;
+            else puntuacion -= 10;
+        }
+        else if (carta.VidaMaxima <= 3)
+        {
+            if (y == 3) puntuacion += 30;
+            else puntuacion -= 10;
+        }
+
+
+        ModeloCasilla casillaEnemigaFrente = tableroLogico.ObtenerCasilla(x, 1);
+        ModeloCasilla casillaEnemigaAtras = tableroLogico.ObtenerCasilla(x, 0);
+
+        ModeloCriatura enemigo = null;
+        if (casillaEnemigaFrente.EstaOcupada) enemigo = casillaEnemigaFrente.CriaturaEnCasilla;
+        else if (casillaEnemigaAtras.EstaOcupada) enemigo = casillaEnemigaAtras.CriaturaEnCasilla;
+
+        if (enemigo != null)
+        {
+            if (carta.Ataque >= enemigo.VidaActual)
+            {
+                if (y == 2) puntuacion += 100;
+            }
+
+            if (enemigo.Ataque >= carta.VidaActual)
+            {
+                puntuacion -= 40;
+            }
+
+            if (carta.Nombre == "Muro" && enemigo.Ataque > 3 && y == 2)
+            {
+                puntuacion += 50;
+            }
+        }
+        else
+        {
+            if (carta.Ataque >= 5) puntuacion += 20;
+        }
+
+        bool hayAliadosEnColumna = false;
+        for (int checkY = 2; checkY < 4; checkY++)
+        {
+            if (checkY != y && tableroLogico.ObtenerCasilla(x, checkY).EstaOcupada)
+            {
+                hayAliadosEnColumna = true;
+                break;
+            }
+        }
+
+        if (!hayAliadosEnColumna) puntuacion += 15;
+
+        return puntuacion;
+    }
+
     ModeloCasilla EvaluarMejorSitioIA()
     {
         for (int x = 0; x < 4; x++)
         {
-            bool columnaAmenazada = tableroLogico.ObtenerCasilla(x, 0).EstaOcupada || tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
+            bool columnaAmenazada = tableroLogico.ObtenerCasilla(x, 0).EstaOcupada ||
+                                    tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
 
             if (columnaAmenazada)
             {
@@ -288,7 +464,8 @@ public class ControladorPartida : MonoBehaviour
 
         for (int x = 0; x < 4; x++)
         {
-            bool columnaLibre = !tableroLogico.ObtenerCasilla(x, 0).EstaOcupada && !tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
+            bool columnaLibre = !tableroLogico.ObtenerCasilla(x, 0).EstaOcupada &&
+                                !tableroLogico.ObtenerCasilla(x, 1).EstaOcupada;
             if (columnaLibre)
             {
                 ModeloCasilla casillaAtaque = tableroLogico.ObtenerCasilla(x, 2);
@@ -313,11 +490,11 @@ public class ControladorPartida : MonoBehaviour
 
     void JugarCartaIA_Visual(ModeloCriatura carta, ModeloCasilla casillaLogica)
     {
-        GameObject objCasilla = GameObject.Find($"Casilla_{casillaLogica.CoordenadaX}_{casillaLogica.CoordenadaY}");
+        InfoCasilla infoCasilla = ObtenerInfoCasilla(casillaLogica.CoordenadaX, casillaLogica.CoordenadaY);
 
-        if (objCasilla != null)
+        if (infoCasilla != null)
         {
-            GameObject cartaIA = Instantiate(PrefabCarta, objCasilla.transform);
+            GameObject cartaIA = Instantiate(PrefabCarta, infoCasilla.transform);
 
             cartaIA.transform.localScale = new Vector3(0.014f, 0.014f, 0.014f);
             cartaIA.transform.localPosition = new Vector3(0, 0.1f, 0);
@@ -337,14 +514,12 @@ public class ControladorPartida : MonoBehaviour
 
             casillaLogica.AsignarCriatura(carta);
 
-            InfoCasilla info = objCasilla.GetComponent<InfoCasilla>();
-            if (info != null) info.RecibirCarta(carta);
+            if (infoCasilla != null) infoCasilla.RecibirCarta(carta);
         }
     }
 
     void ComenzarTurnoJugador()
     {
-
         DespertarCriaturasAliadas();
 
         jugador1.SubirManaMaximo();
@@ -357,13 +532,12 @@ public class ControladorPartida : MonoBehaviour
         esTurnoJugador = true;
         if (GestorUI.Instancia != null) GestorUI.Instancia.ActivarBotonTurno(true);
     }
+
     void DespertarCriaturasAliadas()
     {
         foreach (Transform hijoCasilla in ContenedorTablero)
         {
-
             VistaCriatura criatura = hijoCasilla.GetComponentInChildren<VistaCriatura>();
-
             InfoCasilla infoCasilla = hijoCasilla.GetComponent<InfoCasilla>();
 
             if (criatura != null && infoCasilla != null && infoCasilla.EsTerritorioAliado)
@@ -371,16 +545,16 @@ public class ControladorPartida : MonoBehaviour
                 criatura.Despertar();
             }
         }
+
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 2; y++)
-            { // Mis filas
+            {
                 ModeloCasilla c = tableroLogico.ObtenerCasilla(x, y);
                 if (c.EstaOcupada) c.CriaturaEnCasilla.PuedeAtacar = true;
             }
         }
     }
-
 
     void DespertarCriaturasIA()
     {
@@ -405,17 +579,23 @@ public class ControladorPartida : MonoBehaviour
 
     public void MatarCriatura(ModeloCriatura criatura, ModeloCasilla casilla)
     {
-        casilla.LimpiarCasilla();
-        GameObject objCasilla = GameObject.Find($"Casilla_{casilla.CoordenadaX}_{casilla.CoordenadaY}");
+        criatura.EjecutarHabilidades(HabilidadCarta.MomentoEjecucion.AlMorir, this);
 
-        if (objCasilla != null)
+        casilla.LimpiarCasilla();
+        InfoCasilla infoCasilla = ObtenerInfoCasilla(casilla.CoordenadaX, casilla.CoordenadaY);
+
+        if (infoCasilla != null)
         {
-            VistaCriatura vista = objCasilla.GetComponentInChildren<VistaCriatura>();
+            VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
             if (vista != null)
             {
                 vista.AnimacionMuerte();
-                Destroy(vista.gameObject);
             }
+        }
+
+        if (cacheCriaturas.ContainsKey(criatura))
+        {
+            cacheCriaturas.Remove(criatura);
         }
     }
 
@@ -438,7 +618,7 @@ public class ControladorPartida : MonoBehaviour
 
                 if (casillaAtacante.EstaOcupada && casillaAtacante.CriaturaEnCasilla.PuedeAtacar)
                 {
-                    ModeloCriatura bicho = casillaAtacante.CriaturaEnCasilla;
+                    ModeloCriatura atacanteCreatura = casillaAtacante.CriaturaEnCasilla;
                     ModeloCriatura enemigoEncontrado = null;
                     ModeloCasilla casillaEnemiga = null;
 
@@ -447,7 +627,12 @@ public class ControladorPartida : MonoBehaviour
                         for (int targetY = 2; targetY < 4; targetY++)
                         {
                             ModeloCasilla c = tableroLogico.ObtenerCasilla(x, targetY);
-                            if (c.EstaOcupada) { enemigoEncontrado = c.CriaturaEnCasilla; casillaEnemiga = c; break; }
+                            if (c.EstaOcupada)
+                            {
+                                enemigoEncontrado = c.CriaturaEnCasilla;
+                                casillaEnemiga = c;
+                                break;
+                            }
                         }
                     }
                     else
@@ -455,22 +640,34 @@ public class ControladorPartida : MonoBehaviour
                         for (int targetY = 1; targetY >= 0; targetY--)
                         {
                             ModeloCasilla c = tableroLogico.ObtenerCasilla(x, targetY);
-                            if (c.EstaOcupada) { enemigoEncontrado = c.CriaturaEnCasilla; casillaEnemiga = c; break; }
+                            if (c.EstaOcupada)
+                            {
+                                enemigoEncontrado = c.CriaturaEnCasilla;
+                                casillaEnemiga = c;
+                                break;
+                            }
                         }
                     }
 
                     if (enemigoEncontrado != null)
                     {
-                        enemigoEncontrado.RecibirDanio(bicho.Ataque);
+                        atacanteCreatura.EjecutarHabilidades(HabilidadCarta.MomentoEjecucion.AlAtacar, this);
 
-                        GameObject objCasillaEnemiga = GameObject.Find($"Casilla_{casillaEnemiga.CoordenadaX}_{casillaEnemiga.CoordenadaY}");
-                        if (objCasillaEnemiga)
+                        int danioTotal = atacanteCreatura.Ataque + atacanteCreatura.ObtenerBonusAtaque(enemigoEncontrado);
+
+                        enemigoEncontrado.RecibirDanio(danioTotal);
+
+                        MostrarTextoDanio(casillaEnemiga, danioTotal);
+
+                        InfoCasilla infoCasillaEnemiga = ObtenerInfoCasilla(casillaEnemiga.CoordenadaX, casillaEnemiga.CoordenadaY);
+
+                        if (infoCasillaEnemiga != null)
                         {
-                            VistaCriatura vistaEnemiga = objCasillaEnemiga.GetComponentInChildren<VistaCriatura>();
+                            VistaCriatura vistaEnemiga = infoCasillaEnemiga.GetComponentInChildren<VistaCriatura>();
                             if (vistaEnemiga != null)
                             {
                                 vistaEnemiga.ActualizarVisuales();
-                                vistaEnemiga.AnimacionRecibirDano(bicho.Ataque);
+                                vistaEnemiga.AnimacionRecibirDano(danioTotal);
                             }
                         }
 
@@ -483,7 +680,7 @@ public class ControladorPartida : MonoBehaviour
                     }
                     else
                     {
-                        defensor.RecibirDanio(bicho.Ataque);
+                        defensor.RecibirDanio(atacanteCreatura.Ataque);
                         ActualizarUI();
 
                         yield return new WaitForSeconds(0.4f);
@@ -493,6 +690,139 @@ public class ControladorPartida : MonoBehaviour
         }
     }
 
+    public ModeloCasilla ObtenerCasillaDeCriatura(ModeloCriatura criatura)
+    {
+        if (cacheCriaturas.ContainsKey(criatura))
+        {
+            Vector2Int pos = cacheCriaturas[criatura];
+            return tableroLogico.ObtenerCasilla(pos.x, pos.y);
+        }
+
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = 0; y < 4; y++)
+            {
+                ModeloCasilla casilla = tableroLogico.ObtenerCasilla(x, y);
+                if (casilla.EstaOcupada && casilla.CriaturaEnCasilla == criatura)
+                {
+                    cacheCriaturas[criatura] = new Vector2Int(x, y);
+                    return casilla;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public List<ModeloCasilla> ObtenerCasillasAdyacentes(ModeloCasilla casilla)
+    {
+        List<ModeloCasilla> adyacentes = new List<ModeloCasilla>();
+        int x = casilla.CoordenadaX;
+        int y = casilla.CoordenadaY;
+
+        if (y + 1 < 4) adyacentes.Add(tableroLogico.ObtenerCasilla(x, y + 1));
+        if (y - 1 >= 0) adyacentes.Add(tableroLogico.ObtenerCasilla(x, y - 1));
+        if (x - 1 >= 0) adyacentes.Add(tableroLogico.ObtenerCasilla(x - 1, y));
+        if (x + 1 < 4) adyacentes.Add(tableroLogico.ObtenerCasilla(x + 1, y));
+
+        return adyacentes;
+    }
+
+    public void InvocarCriatura(ModeloCriatura criatura, ModeloCasilla casilla, bool esDelJugador)
+    {
+        criatura.EsDelJugador = esDelJugador;
+        casilla.ColocarCriatura(criatura);
+
+        InfoCasilla infoCasilla = ObtenerInfoCasilla(casilla.CoordenadaX, casilla.CoordenadaY);
+        if (infoCasilla != null)
+        {
+            GameObject nuevaCarta = Instantiate(PrefabCarta, infoCasilla.transform);
+            nuevaCarta.transform.localScale = new Vector3(0.014f, 0.014f, 0.014f);
+            nuevaCarta.transform.localPosition = new Vector3(0, 0.1f, 0);
+            nuevaCarta.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+            VistaCarta vista = nuevaCarta.GetComponent<VistaCarta>();
+            if (vista != null) vista.Configurar(criatura);
+
+            CartaEnTablero scriptTablero = nuevaCarta.GetComponent<CartaEnTablero>();
+            if (scriptTablero != null) scriptTablero.ConfigurarCarta(criatura, esDelJugador);
+
+            infoCasilla.RecibirCarta(criatura);
+            cacheCriaturas[criatura] = new Vector2Int(casilla.CoordenadaX, casilla.CoordenadaY);
+        }
+    }
+
+    public void MostrarTextoCuracion(ModeloCasilla casilla, int cantidad)
+    {
+        if (prefabTextoCuracion == null) return;
+
+        InfoCasilla infoCasilla = ObtenerInfoCasilla(casilla.CoordenadaX, casilla.CoordenadaY);
+        if (infoCasilla != null)
+        {
+            GameObject texto = Instantiate(prefabTextoCuracion, infoCasilla.transform);
+            texto.transform.localPosition = new Vector3(0, 2.5f, 0);
+            TextoFlotante script = texto.GetComponent<TextoFlotante>();
+            if (script != null)
+            {
+                script.ConfigurarTexto($"+{cantidad}", Color.green);
+            }
+        }
+    }
+
+    public void MostrarTextoDanio(ModeloCasilla casilla, int cantidad)
+    {
+        if (prefabTextoDanio == null) return;
+
+        InfoCasilla infoCasilla = ObtenerInfoCasilla(casilla.CoordenadaX, casilla.CoordenadaY);
+        if (infoCasilla != null)
+        {
+            GameObject texto = Instantiate(prefabTextoDanio, infoCasilla.transform);
+            texto.transform.localPosition = new Vector3(0, 2.5f, 0);
+            TextoFlotante script = texto.GetComponent<TextoFlotante>();
+            if (script != null)
+            {
+                script.ConfigurarTexto($"-{cantidad}", Color.red);
+            }
+        }
+    }
+
+    public void RobarMana(bool elJugadorRoba, int cantidad)
+    {
+        if (elJugadorRoba)
+        {
+            jugador1.RobarMana(cantidad);
+            if (jugador2.MagiaActual >= cantidad) jugador2.GastarMagia(cantidad);
+        }
+        else
+        {
+            jugador2.RobarMana(cantidad);
+            if (jugador1.MagiaActual >= cantidad) jugador1.GastarMagia(cantidad);
+        }
+
+        ActualizarUI();
+    }
+
+    private void EjecutarHabilidadesEnTurno(HabilidadCarta.MomentoEjecucion momento, bool turnoJugador)
+    {
+        int filaInicio = turnoJugador ? 0 : 2;
+        int filaFin = turnoJugador ? 2 : 4;
+
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = filaInicio; y < filaFin; y++)
+            {
+                ModeloCasilla casilla = tableroLogico.ObtenerCasilla(x, y);
+                if (casilla.EstaOcupada) casilla.CriaturaEnCasilla.EjecutarHabilidades(momento, this);
+            }
+        }
+    }
+
+    private InfoCasilla ObtenerInfoCasilla(int x, int y)
+    {
+        Vector2Int coordenadas = new Vector2Int(x, y);
+        if (cacheCasillas.ContainsKey(coordenadas)) return cacheCasillas[coordenadas];
+        return null;
+    }
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
 }

@@ -1,13 +1,9 @@
 using System.Collections.Generic;
-using System.Linq; // Esto lo uso para barajar el mazo
+using System.Linq;
 
-
-// El trabajo  de esta clase es gestionar el estado de un jugador
-// su mazo, su mano, su magia y su vida.
 public class ModeloJugador
 {
-
-     public string Nombre { get; private set; }
+    public string Nombre { get; private set; }
 
     public int Vida { get; private set; }
 
@@ -18,19 +14,15 @@ public class ModeloJugador
     public int CartasJugadasEsteTurno { get; private set; }
     private const int MAX_JUGADAS_TURNO = 4;
 
+    private const int MANA_MAXIMO = 10;
 
-
-    // Cartas que componen el mazo del jugador.
     public List<ModeloCriatura> Mazo { get; private set; }
 
-    // Las cartas que el jugador tiene en la mano.
     public List<ModeloCriatura> Mano { get; private set; }
 
-    // Las cartas que ya han sido usadas o destruidas.
     public List<ModeloCriatura> Descarte { get; private set; }
 
     private const int MAX_CARTAS_MANO = 5;
-
 
     public ModeloJugador(string nombre)
     {
@@ -40,7 +32,7 @@ public class ModeloJugador
         this.Mano = new List<ModeloCriatura>();
         this.Descarte = new List<ModeloCriatura>();
 
-        this.MagiaMaxima = 2; 
+        this.MagiaMaxima = 2;
         this.MagiaActual = 0;
         this.ZonasTerrestresRestantes = 4;
         CartasJugadasEsteTurno = 0;
@@ -50,8 +42,22 @@ public class ModeloJugador
 
     public void CargarMazo(List<ModeloCriatura> cartasIniciales)
     {
-        this.Mazo = new List<ModeloCriatura>(cartasIniciales);
+        this.Mazo = new List<ModeloCriatura>();
+
+        foreach (ModeloCriatura carta in cartasIniciales)
+        {
+            ModeloCriatura nuevaCarta = new ModeloCriatura(
+                carta.Id,
+                carta.Nombre,
+                carta.CosteMagia,
+                carta.Ataque,
+                carta.VidaMaxima,
+                carta.NombreModelo3D
+            );
+            this.Mazo.Add(nuevaCarta);
+        }
     }
+
     public bool PuedeJugarCarta()
     {
         return CartasJugadasEsteTurno < MAX_JUGADAS_TURNO;
@@ -65,27 +71,23 @@ public class ModeloJugador
     public void ReiniciarTurno()
     {
         CartasJugadasEsteTurno = 0;
-        // Aquí también recargo maná en el futuro
     }
 
     public void Barajar()
     {
-        // Uso System.Randos porque UnityEngine.Random no funciona fuera del entorno de Unity.
         System.Random random = new System.Random();
         this.Mazo = this.Mazo.OrderBy(carta => random.Next()).ToList();
     }
 
     public ModeloCriatura RobarCarta()
     {
-        // Si el mazo está vacío, no hacemos nada
-        if (Mazo.Count == 0)
+        if (Mazo == null || Mazo.Count == 0)
         {
             return null;
         }
 
         if (Mano.Count >= MAX_CARTAS_MANO)
         {
-            // Si la mano está llena se descarta automaticamente la carta robada
             ModeloCriatura cartaQuemada = Mazo[0];
             Mazo.RemoveAt(0);
             Descarte.Add(cartaQuemada);
@@ -108,11 +110,27 @@ public class ModeloJugador
     public void GastarMagia(int coste)
     {
         this.MagiaActual -= coste;
+        if (this.MagiaActual < 0)
+        {
+            this.MagiaActual = 0;
+        }
     }
 
     public void SubirManaMaximo()
     {
-        this.MagiaMaxima++;
+        if (this.MagiaMaxima < MANA_MAXIMO)
+        {
+            this.MagiaMaxima++;
+        }
+    }
+
+    public void RobarMana(int cantidad)
+    {
+        this.MagiaActual += cantidad;
+        if (this.MagiaActual > this.MagiaMaxima)
+        {
+            this.MagiaActual = this.MagiaMaxima;
+        }
     }
 
     public void EliminarCartaDeMano(ModeloCriatura carta)
@@ -128,4 +146,14 @@ public class ModeloJugador
         Vida -= cantidad;
         if (Vida < 0) Vida = 0;
     }
+
+    public void Curar(int cantidad)
+    {
+        Vida += cantidad;
+        if (Vida > 20) Vida = 20;
+    }
+
+    public bool MazoVacio => Mazo == null || Mazo.Count == 0;
+
+    public int CartasEnMazo => Mazo != null ? Mazo.Count : 0;
 }

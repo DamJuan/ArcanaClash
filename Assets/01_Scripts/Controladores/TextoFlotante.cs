@@ -1,31 +1,29 @@
 using UnityEngine;
-using TMPro; // Necesario
+using TMPro;
 
 public class TextoFlotante : MonoBehaviour
 {
-    public float velocidad = 2f;
-    public float tiempoVida = 1f;
-
     private TMP_Text textoMesh;
-    private Color colorOriginal;
+    private Camera camaraPrincipal;
+    public float velocidad = 2f;
+    public float tiempoVida = 1.5f;
 
     void Awake()
     {
         textoMesh = GetComponent<TMP_Text>();
-
-        if (textoMesh == null)
-        {
-            Debug.LogError("¡Falta el componente de texto!");
-            return;
-        }
-
-        colorOriginal = textoMesh.color;
+        if (textoMesh == null) textoMesh = GetComponentInChildren<TMP_Text>();
+        camaraPrincipal = Camera.main;
     }
 
-    public void Configurar(int cantidad)
+    public void ConfigurarTexto(string contenido, Color color)
     {
+        if (textoMesh == null) textoMesh = GetComponent<TMP_Text>();
+
         if (textoMesh != null)
-            textoMesh.text = "-" + cantidad.ToString();
+        {
+            textoMesh.text = contenido;
+            textoMesh.color = color;
+        }
 
         Destroy(gameObject, tiempoVida);
     }
@@ -34,15 +32,9 @@ public class TextoFlotante : MonoBehaviour
     {
         transform.Translate(Vector3.up * velocidad * Time.deltaTime);
 
-        if (textoMesh != null)
+        if (camaraPrincipal != null)
         {
-            float alpha = textoMesh.color.a - (Time.deltaTime / tiempoVida);
-            textoMesh.color = new Color(colorOriginal.r, colorOriginal.g, colorOriginal.b, alpha);
-        }
-
-        if (Camera.main != null)
-        {
-            transform.rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
+            transform.rotation = Quaternion.LookRotation(transform.position - camaraPrincipal.transform.position);
         }
     }
 }
