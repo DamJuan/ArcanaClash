@@ -30,8 +30,6 @@ public abstract class HabilidadCarta
 public class HabilidadCuracion : HabilidadCarta
 {
     public int cantidadCura = 2;
-
-    // ✅ ARREGLO 1: Agregar constructor para establecer el Momento
     public HabilidadCuracion()
     {
         Nombre = "Toque Curativo";
@@ -51,7 +49,6 @@ public class HabilidadCuracion : HabilidadCarta
 
                 controlador.MostrarTextoCuracion(casilla, cantidadCura);
 
-                // ✅ ARREGLO 2: Actualizar la vista de la criatura curada
                 InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
                 if (infoCasilla != null)
                 {
@@ -90,7 +87,6 @@ public class HabilidadVampiro : HabilidadCarta
         {
             controlador.MostrarTextoCuracion(casilla, curacion);
 
-            // Actualizar la vista del vampiro que se curó
             InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
             if (infoCasilla != null)
             {
@@ -121,17 +117,20 @@ public class HabilidadEscudo : HabilidadCarta
         if (escudoActivo)
         {
             escudoActivo = false;
-            // ✅ ARREGLO 3: Después de desactivar el escudo, actualizar la vista
-            ModeloCasilla casilla = controlador.ObtenerCasillaDeCriatura(criatura);
-            if (casilla != null)
+
+            if (controlador != null)
             {
-                InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
-                if (infoCasilla != null)
+                ModeloCasilla casilla = controlador.ObtenerCasillaDeCriatura(criatura);
+                if (casilla != null)
                 {
-                    VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
-                    if (vista != null)
+                    InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
+                    if (infoCasilla != null)
                     {
-                        vista.ActualizarIconoHabilidades();
+                        VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
+                        if (vista != null)
+                        {
+                            vista.ActualizarIconoHabilidades();
+                        }
                     }
                 }
             }

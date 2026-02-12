@@ -11,6 +11,7 @@ public class VistaCriatura : MonoBehaviour
     public TextMeshProUGUI textoVida;
     public TextMeshProUGUI textoAtaque;
     public GameObject indicadorEscudo;
+    public GameObject modelo3DEscudo;
 
     [Header("Referencias 3D")]
     public GameObject modelo3D;
@@ -40,6 +41,11 @@ public class VistaCriatura : MonoBehaviour
         if (indicadorEscudo != null)
         {
             indicadorEscudo.SetActive(false);
+        }
+
+        if (modelo3DEscudo != null)
+        {
+            modelo3DEscudo.SetActive(false);
         }
     }
 
@@ -151,7 +157,6 @@ public class VistaCriatura : MonoBehaviour
         }
     }
 
-    // ✅ ARREGLO: Hacer público ActualizarIconoHabilidades para que pueda ser llamado desde HabilidadEscudo
     public void ActualizarIconoHabilidades()
     {
         if (modeloAsociado == null) return;
@@ -163,6 +168,15 @@ public class VistaCriatura : MonoBehaviour
                                      modeloAsociado.escudo.EscudoActivo;
 
             indicadorEscudo.SetActive(tieneEscudoActivo);
+        }
+
+        if (modelo3DEscudo != null)
+        {
+            bool tieneEscudoActivo = modeloAsociado.TieneHabilidad<HabilidadEscudo>() &&
+                                     modeloAsociado.escudo != null &&
+                                     modeloAsociado.escudo.EscudoActivo;
+
+            modelo3DEscudo.SetActive(tieneEscudoActivo);
         }
     }
 
@@ -211,7 +225,6 @@ public class VistaCriatura : MonoBehaviour
 
     public void AnimacionCuracion(int cantidad)
     {
-        // ✅ ARREGLO: Instanciar las partículas en vez de intentar reproducir un prefab
         if (particulasCuracion != null)
         {
             ParticleSystem particulas = Instantiate(particulasCuracion, transform.position, Quaternion.identity);
@@ -247,11 +260,10 @@ public class VistaCriatura : MonoBehaviour
             animator.SetTrigger("Morir");
         }
 
-        // ✅ ARREGLO: Instanciar las partículas en vez de intentar reproducir un prefab
         if (particulasMuerte != null)
         {
             ParticleSystem particulas = Instantiate(particulasMuerte, transform.position, Quaternion.identity);
-            particulas.transform.SetParent(transform.parent); // Padre del personaje para que no se destruya con él
+            particulas.transform.SetParent(transform.parent);
             particulas.Play();
             Destroy(particulas.gameObject, particulas.main.duration + particulas.main.startLifetime.constantMax);
         }
