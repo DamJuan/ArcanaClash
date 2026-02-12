@@ -265,7 +265,8 @@ public class ControladorPartida : MonoBehaviour
 
         Dictionary<int, int> amenazasPorColumna = EvaluarAmenazas(false);
 
-        cartasEnMano.Sort((a, b) => {
+        cartasEnMano.Sort((a, b) =>
+        {
             int prioridadA = CalcularPrioridadCarta(a, amenazasPorColumna);
             int prioridadB = CalcularPrioridadCarta(b, amenazasPorColumna);
             return prioridadB.CompareTo(prioridadA);
@@ -825,4 +826,11 @@ public class ControladorPartida : MonoBehaviour
     }
 
     public bool EsTurnoDeJugador { get { return esTurnoJugador; } }
+
+    public InfoCasilla ObtenerInfoCasillaPublica(int x, int y)
+    {
+        Vector2Int coordenadas = new Vector2Int(x, y);
+        if (cacheCasillas.ContainsKey(coordenadas)) return cacheCasillas[coordenadas];
+        return null;
+    }
 }

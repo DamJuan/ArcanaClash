@@ -18,7 +18,7 @@ public class VistaCriatura : MonoBehaviour
     public Material materialDormido;
     public Material materialHerido;
 
-    [Header("Efectos - Opcionales")]
+    [Header("Efectos - Opcionales (PREFABS, no instancias)")]
     public ParticleSystem particulasAtaque;
     public ParticleSystem particulasMuerte;
     public ParticleSystem particulasCuracion;
@@ -151,7 +151,8 @@ public class VistaCriatura : MonoBehaviour
         }
     }
 
-    private void ActualizarIconoHabilidades()
+    // ✅ ARREGLO: Hacer público ActualizarIconoHabilidades para que pueda ser llamado desde HabilidadEscudo
+    public void ActualizarIconoHabilidades()
     {
         if (modeloAsociado == null) return;
 
@@ -210,9 +211,13 @@ public class VistaCriatura : MonoBehaviour
 
     public void AnimacionCuracion(int cantidad)
     {
+        // ✅ ARREGLO: Instanciar las partículas en vez de intentar reproducir un prefab
         if (particulasCuracion != null)
         {
-            particulasCuracion.Play();
+            ParticleSystem particulas = Instantiate(particulasCuracion, transform.position, Quaternion.identity);
+            particulas.transform.SetParent(transform);
+            particulas.Play();
+            Destroy(particulas.gameObject, particulas.main.duration + particulas.main.startLifetime.constantMax);
         }
 
         StartCoroutine(BrilloVerde());
@@ -228,7 +233,10 @@ public class VistaCriatura : MonoBehaviour
 
         if (particulasAtaque != null)
         {
-            particulasAtaque.Play();
+            ParticleSystem particulas = Instantiate(particulasAtaque, transform.position, Quaternion.identity);
+            particulas.transform.SetParent(transform);
+            particulas.Play();
+            Destroy(particulas.gameObject, particulas.main.duration + particulas.main.startLifetime.constantMax);
         }
     }
 
@@ -239,9 +247,13 @@ public class VistaCriatura : MonoBehaviour
             animator.SetTrigger("Morir");
         }
 
+        // ✅ ARREGLO: Instanciar las partículas en vez de intentar reproducir un prefab
         if (particulasMuerte != null)
         {
-            particulasMuerte.Play();
+            ParticleSystem particulas = Instantiate(particulasMuerte, transform.position, Quaternion.identity);
+            particulas.transform.SetParent(transform.parent); // Padre del personaje para que no se destruya con él
+            particulas.Play();
+            Destroy(particulas.gameObject, particulas.main.duration + particulas.main.startLifetime.constantMax);
         }
 
         StartCoroutine(FadeOut());

@@ -8,12 +8,12 @@ public abstract class HabilidadCarta
 
     public enum MomentoEjecucion
     {
-        AlJugar,         
-        AlAtacar,         
-        AlRecibirDanio,  
-        AlMorir,          
-        InicioTurno,      
-        FinTurno          
+        AlJugar,
+        AlAtacar,
+        AlRecibirDanio,
+        AlMorir,
+        InicioTurno,
+        FinTurno
     }
 
     public MomentoEjecucion Momento { get; protected set; }
@@ -31,6 +31,14 @@ public class HabilidadCuracion : HabilidadCarta
 {
     public int cantidadCura = 2;
 
+    // ✅ ARREGLO 1: Agregar constructor para establecer el Momento
+    public HabilidadCuracion()
+    {
+        Nombre = "Toque Curativo";
+        Descripcion = "Al inicio del turno, cura 2 de vida a aliados adyacentes";
+        Momento = MomentoEjecucion.InicioTurno;
+    }
+
     public override void Ejecutar(ModeloCriatura usuario, ControladorPartida controlador)
     {
         List<ModeloCasilla> adyacentes = controlador.ObtenerCasillasAdyacentes(controlador.ObtenerCasillaDeCriatura(usuario));
@@ -43,6 +51,18 @@ public class HabilidadCuracion : HabilidadCarta
 
                 controlador.MostrarTextoCuracion(casilla, cantidadCura);
 
+                // ✅ ARREGLO 2: Actualizar la vista de la criatura curada
+                InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
+                if (infoCasilla != null)
+                {
+                    VistaCriatura vistaCurada = infoCasilla.GetComponentInChildren<VistaCriatura>();
+                    if (vistaCurada != null)
+                    {
+                        vistaCurada.AnimacionCuracion(cantidadCura);
+                        vistaCurada.ActualizarVisuales();
+                    }
+                }
+
                 Debug.Log($"{usuario.Nombre} cura a {casilla.CriaturaEnCasilla.Nombre}");
             }
         }
@@ -51,7 +71,7 @@ public class HabilidadCuracion : HabilidadCarta
 
 public class HabilidadVampiro : HabilidadCarta
 {
-    private float porcentajeRobo = 0.5f; 
+    private float porcentajeRobo = 0.5f;
 
     public HabilidadVampiro()
     {
@@ -69,6 +89,18 @@ public class HabilidadVampiro : HabilidadCarta
         if (casilla != null)
         {
             controlador.MostrarTextoCuracion(casilla, curacion);
+
+            // Actualizar la vista del vampiro que se curó
+            InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
+            if (infoCasilla != null)
+            {
+                VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
+                if (vista != null)
+                {
+                    vista.AnimacionCuracion(curacion);
+                    vista.ActualizarVisuales();
+                }
+            }
         }
     }
 }
@@ -89,6 +121,20 @@ public class HabilidadEscudo : HabilidadCarta
         if (escudoActivo)
         {
             escudoActivo = false;
+            // ✅ ARREGLO 3: Después de desactivar el escudo, actualizar la vista
+            ModeloCasilla casilla = controlador.ObtenerCasillaDeCriatura(criatura);
+            if (casilla != null)
+            {
+                InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
+                if (infoCasilla != null)
+                {
+                    VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
+                    if (vista != null)
+                    {
+                        vista.ActualizarIconoHabilidades();
+                    }
+                }
+            }
         }
     }
 
