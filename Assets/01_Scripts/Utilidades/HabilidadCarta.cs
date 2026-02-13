@@ -159,6 +159,11 @@ public class HabilidadDivision : HabilidadCarta
         Momento = MomentoEjecucion.AlMorir;
     }
 
+    public override bool PuedeEjecutar(ModeloCriatura criatura)
+    {
+        return criatura != null;
+    }
+
     public override void Ejecutar(ModeloCriatura criatura, ControladorPartida controlador)
     {
         ModeloCasilla casillaOriginal = controlador.ObtenerCasillaDeCriatura(criatura);
@@ -198,6 +203,11 @@ public class HabilidadExplosion : HabilidadCarta
         Momento = MomentoEjecucion.AlMorir;
     }
 
+    public override bool PuedeEjecutar(ModeloCriatura criatura)
+    {
+        return criatura != null;
+    }
+
     public override void Ejecutar(ModeloCriatura criatura, ControladorPartida controlador)
     {
         ModeloCasilla casillaOriginal = controlador.ObtenerCasillaDeCriatura(criatura);
@@ -211,6 +221,17 @@ public class HabilidadExplosion : HabilidadCarta
             {
                 casilla.CriaturaEnCasilla.RecibirDanio(danioExplosion);
                 controlador.MostrarTextoDanio(casilla, danioExplosion);
+
+                InfoCasilla infoCasilla = controlador.ObtenerInfoCasillaPublica(casilla.CoordenadaX, casilla.CoordenadaY);
+                if (infoCasilla != null)
+                {
+                    VistaCriatura vista = infoCasilla.GetComponentInChildren<VistaCriatura>();
+                    if (vista != null)
+                    {
+                        vista.ActualizarVisuales();
+                        vista.ActualizarIconoHabilidades();
+                    }
+                }
             }
         }
     }

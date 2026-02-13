@@ -669,6 +669,7 @@ public class ControladorPartida : MonoBehaviour
                             {
                                 vistaEnemiga.ActualizarVisuales();
                                 vistaEnemiga.AnimacionRecibirDano(danioTotal);
+                                vistaEnemiga.ActualizarIconoHabilidades();
                             }
                         }
 
